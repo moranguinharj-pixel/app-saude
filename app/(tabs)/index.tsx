@@ -1,48 +1,21 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-
+import { useCallback, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { AppCard } from "@/components/app-card";
+import { EmptyState } from "@/components/empty-state";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { SectionTitle } from "@/components/section-title";
+import { formatDateTime } from "@/lib/format";
+import { loadAppData } from "@/lib/local-data";
+import { weatherDescription } from "@/lib/weather";
+import { AppData, EMPTY_APP_DATA } from "@/shared/records";
 import { ScreenContainer } from "@/components/screen-container";
 
-/**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
- */
 export default function HomeScreen() {
-  return (
-    <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
-            <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
-            </Text>
-          </View>
-
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
-            </Text>
-          </View>
-
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </ScreenContainer>
-  );
+  const router = useRouter(); const [data, setData] = useState<AppData>(EMPTY_APP_DATA); const go = (path: string) => router.push(path as never);
+  useFocusEffect(useCallback(() => { loadAppData().then(setData); }, []));
+  const upcomingEvent = data.calendarEntries.find((entry) => new Date(entry.startsAt) >= new Date()); const latestHealth = data.healthEntries[0]; const latestWeather = data.weatherEntries[0];
+  return <ScreenContainer className="px-5" containerClassName="bg-background"><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}><SectionTitle eyebrow="Seu painel local" title="Registro Pessoal" detail="Dados salvos somente neste aparelho." /><View style={styles.quickRow}><QuickAction label="Saúde" detail="Novo dado" color="#3F8D72" icon="heart.fill" onPress={() => go("/health-entry")} /><QuickAction label="Clima" detail="Capturar agora" color="#D79127" icon="cloud.sun.fill" onPress={() => go("/weather-capture")} /><QuickAction label="Evento" detail="No calendário" color="#6966B3" icon="calendar" onPress={() => go("/calendar-entry")} /></View><Text style={styles.sectionLabel}>RESUMO DO DIA</Text>{latestHealth ? <AppCard title="Último registro de saúde" tone="health" accessory={<IconSymbol name="heart.fill" size={19} color="#3F8D72" />}><Text style={styles.metric}>{latestHealth.value} {latestHealth.unit}</Text><Text style={styles.detail}>{latestHealth.metricName} · {formatDateTime(latestHealth.recordedAt)}</Text></AppCard> : <EmptyState icon={<IconSymbol name="heart.fill" size={24} color="#3F8D72" />} title="Nenhuma métrica registrada" description="Adicione seu primeiro registro de saúde para começar." />}<View style={styles.gap} />{latestWeather ? <AppCard title="Última observação de clima" tone="weather" accessory={<IconSymbol name="cloud.sun.fill" size={20} color="#D79127" />}><View style={styles.inline}><Text style={styles.metric}>{Math.round(latestWeather.temperature)}°C</Text><Text style={styles.weatherText}>{weatherDescription(latestWeather.weatherCode)}</Text></View><Text style={styles.detail}>Sensação de {Math.round(latestWeather.apparentTemperature)}°C · {formatDateTime(latestWeather.capturedAt)}</Text></AppCard> : <EmptyState icon={<IconSymbol name="cloud.sun.fill" size={24} color="#D79127" />} title="Clima ainda não capturado" description="Use sua localização somente quando quiser registrar uma observação." />}<View style={styles.gap} />{upcomingEvent ? <AppCard title="Próximo evento" tone="calendar" accessory={<IconSymbol name="calendar" size={20} color="#6966B3" />}><Text style={styles.eventTitle}>{upcomingEvent.title}</Text><Text style={styles.detail}>{formatDateTime(upcomingEvent.startsAt)} · {upcomingEvent.category}</Text></AppCard> : <EmptyState icon={<IconSymbol name="calendar" size={24} color="#6966B3" />} title="Nenhum evento próximo" description="Organize compromissos pessoais em seu calendário local." />}</ScrollView></ScreenContainer>;
 }
+function QuickAction({ label, detail, color, icon, onPress }: { label: string; detail: string; color: string; icon: "heart.fill" | "cloud.sun.fill" | "calendar"; onPress: () => void }) { return <TouchableOpacity onPress={onPress} activeOpacity={0.78} style={styles.quickAction}><View style={[styles.quickIcon, { backgroundColor: `${color}18` }]}><IconSymbol name={icon} size={22} color={color} /></View><Text style={styles.quickLabel}>{label}</Text><Text style={styles.quickDetail}>{detail}</Text></TouchableOpacity>; }
+const styles = StyleSheet.create({ content: { paddingBottom: 28, paddingTop: 10 }, quickRow: { flexDirection: "row", gap: 10, marginBottom: 26 }, quickAction: { backgroundColor: "#FFFFFF", borderColor: "#E2E9EC", borderRadius: 18, borderWidth: 1, flex: 1, minHeight: 116, padding: 12 }, quickIcon: { alignItems: "center", borderRadius: 12, height: 42, justifyContent: "center", marginBottom: 11, width: 42 }, quickLabel: { color: "#152A33", fontSize: 13, fontWeight: "800" }, quickDetail: { color: "#60747C", fontSize: 11, lineHeight: 15, marginTop: 3 }, sectionLabel: { color: "#789098", fontSize: 11, fontWeight: "800", letterSpacing: 1.1, marginBottom: 10 }, gap: { height: 12 }, metric: { color: "#152A33", fontSize: 25, fontWeight: "800", letterSpacing: -0.4 }, detail: { color: "#60747C", fontSize: 13, lineHeight: 20, marginTop: 5 }, inline: { alignItems: "baseline", flexDirection: "row", gap: 8 }, weatherText: { color: "#677A82", fontSize: 14, fontWeight: "600" }, eventTitle: { color: "#152A33", fontSize: 18, fontWeight: "800" } });

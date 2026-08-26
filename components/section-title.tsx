@@ -1,0 +1,3 @@
+import { StyleSheet, Text, View } from "react-native";
+export function SectionTitle({ eyebrow, title, detail }: { eyebrow?: string; title: string; detail?: string }) { return <View style={styles.container}>{eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}<Text style={styles.title}>{title}</Text>{detail ? <Text style={styles.detail}>{detail}</Text> : null}</View>; }
+const styles = StyleSheet.create({ container: { marginBottom: 20 }, eyebrow: { color: "#176B87", fontSize: 12, fontWeight: "800", letterSpacing: 1, marginBottom: 5, textTransform: "uppercase" }, title: { color: "#152A33", fontSize: 28, fontWeight: "800", letterSpacing: -0.5 }, detail: { color: "#60747C", fontSize: 14, lineHeight: 20, marginTop: 5 } });

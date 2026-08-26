@@ -32,7 +32,7 @@ const env = {
   appSlug: "registro-pessoal",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "/manus-storage/registro-pessoal-icon_612ff284.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -86,6 +86,12 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission: "Permita que o Registro Pessoal use sua localização para consultar e registrar o clima quando você solicitar.",
+      },
+    ],
     [
       "expo-audio",
       {
