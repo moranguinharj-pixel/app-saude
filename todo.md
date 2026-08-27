@@ -147,3 +147,6 @@
 - [x] Implementar zoom por gesto de pinça com dois dedos, limitado a 9×.
 - [x] Remover os botões de aumentar/reduzir zoom e manter redefinição discreta.
 - [x] Validar que o gesto não desloca a coordenada anatômica selecionada.
+
+- [x] Enviar ao GitHub as novas imagens anatômicas e a integração do mapa corporal posteriores à versão 10.
+- [x] Criar e validar um novo commit sem sobrescrever a versão 10.
