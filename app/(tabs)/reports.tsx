@@ -9,7 +9,7 @@ import { SectionTitle } from "@/components/section-title";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { shareLocalBackup } from "@/lib/export-data";
 import { loadAppData } from "@/lib/local-data";
-import { calculateAverageTemperature, calculateMetricAverages, getDataForPeriod } from "@/lib/reports";
+import { buildPainReport } from "@/lib/pain-reports";
 import { AppData, EMPTY_APP_DATA } from "@/shared/records";
 import { ScreenContainer } from "@/components/screen-container";
 
@@ -19,66 +19,15 @@ export default function ReportsScreen() {
   const [data, setData] = useState<AppData>(EMPTY_APP_DATA);
   const [period, setPeriod] = useState<Period>(30);
   const [exporting, setExporting] = useState(false);
-
   useFocusEffect(useCallback(() => { loadAppData().then(setData); }, []));
-
-  const filtered = useMemo(() => getDataForPeriod(data, period), [data, period]);
-  const averages = useMemo(() => calculateMetricAverages(filtered.healthEntries), [filtered.healthEntries]);
-  const averageTemperature = useMemo(() => calculateAverageTemperature(filtered.weatherEntries), [filtered.weatherEntries]);
-  const hasData = filtered.healthEntries.length + filtered.weatherEntries.length + filtered.calendarEntries.length > 0;
-
-  const exportData = async () => {
-    if (!hasData) return;
-    setExporting(true);
-    try {
-      await shareLocalBackup(data);
-    } catch (error) {
-      Alert.alert("Não foi possível exportar", error instanceof Error ? error.message : "Tente novamente em alguns instantes.");
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  return (
-    <ScreenContainer className="px-5" containerClassName="bg-background">
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <SectionTitle eyebrow="Síntese no aparelho" title="Relatórios" detail="Resultados calculados localmente, sem envio de seus registros." />
-        <View style={styles.periodRow}>
-          <PeriodButton label="7 dias" selected={period === 7} onPress={() => setPeriod(7)} />
-          <PeriodButton label="30 dias" selected={period === 30} onPress={() => setPeriod(30)} />
-          <PeriodButton label="90 dias" selected={period === 90} onPress={() => setPeriod(90)} />
-        </View>
-        {hasData ? (
-          <>
-            <View style={styles.summaryGrid}>
-              <SummaryCard label="Saúde" value={String(filtered.healthEntries.length)} detail="registros" color="#3F8D72" />
-              <SummaryCard label="Clima" value={String(filtered.weatherEntries.length)} detail="capturas" color="#D79127" />
-              <SummaryCard label="Agenda" value={String(filtered.calendarEntries.length)} detail="eventos" color="#6966B3" />
-            </View>
-            {averages.length ? <HealthReport averages={averages} /> : null}
-            {filtered.weatherEntries.length ? <View style={styles.gap}><AppCard title="Clima registrado" tone="weather"><Text style={styles.weatherMetric}>{averageTemperature?.toFixed(1)}°C</Text><Text style={styles.weatherDetail}>Temperatura média das observações no período selecionado.</Text></AppCard></View> : null}
-            {filtered.calendarEntries.length ? <View style={styles.gap}><AppCard title="Agenda no período" tone="calendar"><Text style={styles.weatherMetric}>{filtered.calendarEntries.length}</Text><Text style={styles.weatherDetail}>Evento{filtered.calendarEntries.length === 1 ? "" : "s"} com início dentro do período selecionado.</Text></AppCard></View> : null}
-            <View style={styles.exportSection}>
-              <Text style={styles.exportTitle}>Cópia dos seus dados</Text>
-              <Text style={styles.exportDetail}>Gere um arquivo JSON para guardar ou compartilhar por um canal que você escolher.</Text>
-              <PrimaryButton label="Exportar dados locais" variant="subtle" onPress={exportData} loading={exporting} />
-            </View>
-          </>
-        ) : (
-          <EmptyState icon={<IconSymbol name="chart.bar.fill" size={25} color="#176B87" />} title="Ainda não há dados neste período" description="Adicione registros de saúde, clima ou eventos para ver um resumo por intervalo." />
-        )}
-      </ScrollView>
-    </ScreenContainer>
-  );
-}
-
-function HealthReport({ averages }: { averages: ReturnType<typeof calculateMetricAverages> }) {
-  return <AppCard title="Métricas de saúde" tone="health"><View style={styles.tableHead}><Text style={styles.tableHeadText}>MÉTRICA</Text><Text style={styles.tableHeadText}>MÉDIA</Text></View>{averages.map((metric) => <View key={`${metric.metricName}-${metric.unit}`} style={styles.metricRow}><View><Text style={styles.metricName}>{metric.metricName}</Text><Text style={styles.metricCount}>{metric.count} registro{metric.count === 1 ? "" : "s"}</Text></View><Text style={styles.average}>{metric.average.toFixed(1)} {metric.unit}</Text></View>)}</AppCard>;
+  const report = useMemo(() => buildPainReport(data.painEntries, period), [data.painEntries, period]);
+  const exportData = async () => { setExporting(true); try { await shareLocalBackup(data); } catch (error) { Alert.alert("Não foi possível exportar", error instanceof Error ? error.message : "Tente novamente."); } finally { setExporting(false); } };
+  return <ScreenContainer className="px-5" containerClassName="bg-background"><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}><SectionTitle eyebrow="Para conversar com seu médico" title="Relatório de dor" detail="Associações observadas nos seus registros. Elas não indicam causa ou diagnóstico." /><View style={styles.periodRow}><PeriodButton label="7 dias" selected={period === 7} onPress={() => setPeriod(7)} /><PeriodButton label="30 dias" selected={period === 30} onPress={() => setPeriod(30)} /><PeriodButton label="90 dias" selected={period === 90} onPress={() => setPeriod(90)} /></View>{report.entries.length ? <><View style={styles.summaryGrid}><SummaryCard label="Ocorrências" value={String(report.entries.length)} color="#E98B5A" /><SummaryCard label="Intensidade média" value={`${report.intensityAverage.toFixed(1)}/10`} color="#B55735" /><SummaryCard label="Com clima" value={String(report.weatherCount)} color="#D79127" /></View><AppCard title="Locais mais registrados" tone="health"><RankList rows={report.sites.slice(0, 5)} /></AppCard><View style={styles.gap}><AppCard title="Sensações relatadas"><RankList rows={report.types.slice(0, 5)} /></AppCard></View><View style={styles.gap}><AppCard title="Regiões de irradiação"><RankList rows={report.radiation.slice(0, 5)} /></AppCard></View><View style={styles.gap}><AppCard title="Emoções no momento" tone="calendar"><IntensityList rows={report.averageIntensityByEmotion.slice(0, 5)} /></AppCard></View><View style={styles.gap}><AppCard title="Alimentos selecionados" tone="weather"><IntensityList rows={report.foods.slice(0, 6)} /></AppCard></View>{report.weatherAverage !== null ? <View style={styles.gap}><AppCard title="Clima associado" tone="weather"><Text style={styles.bigNumber}>{report.weatherAverage.toFixed(1)}°C</Text><Text style={styles.detail}>Temperatura média nas ocorrências que tiveram captura de clima.</Text></AppCard></View> : null}<View style={styles.notice}><IconSymbol name="checkmark.circle.fill" size={20} color="#3F8D72" /><Text style={styles.noticeText}>O relatório descreve o que foi registrado. Leve-o ao profissional de saúde para interpretação clínica.</Text></View><PrimaryButton label="Exportar relatório e dados" variant="subtle" onPress={exportData} loading={exporting} /></> : <EmptyState icon={<IconSymbol name="chart.bar.fill" size={25} color="#176B87" />} title="Ainda não há ocorrências neste período" description="Registre uma ocorrência de dor para começar a visualizar seus padrões." />}</ScrollView></ScreenContainer>;
 }
 
 function PeriodButton({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) { return <TouchableOpacity onPress={onPress} style={[styles.periodButton, selected && styles.periodButtonSelected]}><Text style={[styles.periodText, selected && styles.periodTextSelected]}>{label}</Text></TouchableOpacity>; }
-function SummaryCard({ label, value, detail, color }: { label: string; value: string; detail: string; color: string }) { return <View style={[styles.summaryCard, { borderTopColor: color }]}><Text style={styles.summaryLabel}>{label}</Text><Text style={styles.summaryValue}>{value}</Text><Text style={styles.summaryDetail}>{detail}</Text></View>; }
+function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) { return <View style={[styles.summaryCard, { borderTopColor: color }]}><Text style={styles.summaryLabel}>{label}</Text><Text style={styles.summaryValue}>{value}</Text></View>; }
+function RankList({ rows }: { rows: { id: string; label: string; count: number }[] }) { return <View>{rows.map((row) => <View key={row.id} style={styles.rankRow}><Text style={styles.rowLabel}>{row.label}</Text><View style={styles.rankRight}><View style={styles.track}><View style={[styles.fill, { width: `${Math.min(100, row.count * 18 + 12)}%` }]} /></View><Text style={styles.count}>{row.count}</Text></View></View>)}</View>; }
+function IntensityList({ rows }: { rows: { id: string; label: string; count: number; averageIntensity: number }[] }) { return <View>{rows.map((row) => <View key={row.id} style={styles.rankRow}><View><Text style={styles.rowLabel}>{row.label}</Text><Text style={styles.subLabel}>{row.count} registro{row.count === 1 ? "" : "s"}</Text></View><Text style={styles.average}>{row.averageIntensity.toFixed(1)}/10</Text></View>)}</View>; }
 
-const styles = StyleSheet.create({
-  content: { paddingBottom: 28, paddingTop: 10 }, periodRow: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 18, padding: 4 }, periodButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 38 }, periodButtonSelected: { backgroundColor: "#176B87" }, periodText: { color: "#60747C", fontSize: 13, fontWeight: "700" }, periodTextSelected: { color: "#FFFFFF" }, summaryGrid: { flexDirection: "row", gap: 8, marginBottom: 14 }, summaryCard: { backgroundColor: "#FFFFFF", borderColor: "#E2E9EC", borderRadius: 16, borderTopWidth: 4, borderWidth: 1, flex: 1, minHeight: 102, padding: 11 }, summaryLabel: { color: "#60747C", fontSize: 12, fontWeight: "700" }, summaryValue: { color: "#152A33", fontSize: 26, fontWeight: "800", marginTop: 7 }, summaryDetail: { color: "#789098", fontSize: 11, marginTop: 1 }, tableHead: { flexDirection: "row", justifyContent: "space-between", paddingBottom: 7 }, tableHeadText: { color: "#789098", fontSize: 10, fontWeight: "800", letterSpacing: 0.8 }, metricRow: { alignItems: "center", borderTopColor: "#ECF0F2", borderTopWidth: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: 12 }, metricName: { color: "#152A33", fontSize: 15, fontWeight: "700" }, metricCount: { color: "#789098", fontSize: 12, marginTop: 3 }, average: { color: "#3F8D72", fontSize: 15, fontWeight: "800" }, gap: { height: 12 }, weatherMetric: { color: "#152A33", fontSize: 30, fontWeight: "800" }, weatherDetail: { color: "#60747C", fontSize: 13, lineHeight: 20, marginTop: 5 }, exportSection: { backgroundColor: "#EAF4F7", borderRadius: 20, marginTop: 14, padding: 16 }, exportTitle: { color: "#152A33", fontSize: 16, fontWeight: "800" }, exportDetail: { color: "#526873", fontSize: 13, lineHeight: 19, marginBottom: 14, marginTop: 5 },
-});
+const styles = StyleSheet.create({ content: { paddingBottom: 30, paddingTop: 10 }, periodRow: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 18, padding: 4 }, periodButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 38 }, periodButtonSelected: { backgroundColor: "#176B87" }, periodText: { color: "#60747C", fontSize: 13, fontWeight: "700" }, periodTextSelected: { color: "#FFFFFF" }, summaryGrid: { flexDirection: "row", gap: 8, marginBottom: 14 }, summaryCard: { backgroundColor: "#FFFFFF", borderColor: "#E2E9EC", borderRadius: 16, borderTopWidth: 4, borderWidth: 1, flex: 1, minHeight: 90, padding: 11 }, summaryLabel: { color: "#60747C", fontSize: 11, fontWeight: "700" }, summaryValue: { color: "#152A33", fontSize: 20, fontWeight: "800", marginTop: 9 }, gap: { height: 12 }, rankRow: { alignItems: "center", borderTopColor: "#ECF0F2", borderTopWidth: 1, flexDirection: "row", justifyContent: "space-between", minHeight: 50, paddingVertical: 8 }, rowLabel: { color: "#152A33", fontSize: 14, fontWeight: "700" }, subLabel: { color: "#789098", fontSize: 11, marginTop: 3 }, rankRight: { alignItems: "center", flexDirection: "row", gap: 8, marginLeft: 10 }, track: { backgroundColor: "#ECF0F2", borderRadius: 5, height: 7, overflow: "hidden", width: 70 }, fill: { backgroundColor: "#E98B5A", borderRadius: 5, height: 7 }, count: { color: "#B55735", fontSize: 14, fontWeight: "800", minWidth: 18, textAlign: "right" }, average: { color: "#176B87", fontSize: 15, fontWeight: "800" }, bigNumber: { color: "#152A33", fontSize: 32, fontWeight: "800" }, detail: { color: "#60747C", fontSize: 13, lineHeight: 20, marginTop: 4 }, notice: { alignItems: "center", backgroundColor: "#EAF6F0", borderRadius: 15, flexDirection: "row", gap: 10, marginVertical: 14, padding: 13 }, noticeText: { color: "#3F6656", flex: 1, fontSize: 12, lineHeight: 17 } });

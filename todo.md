@@ -12,3 +12,17 @@
 - [x] Validar fluxos essenciais no Android, finalizar a documentação e preparar a primeira versão.
 - [x] Alinhar os módulos nativos de localização, arquivos e compartilhamento à versão do Expo do projeto.
 - [x] Otimizar os arquivos de ícone do aplicativo para permitir o salvamento da versão.
+
+- [x] Redesenhar a experiência inicial para diário visual de dor com silhueta corporal frente/costas e acessibilidade ampliada.
+- [x] Adicionar modelo local de ocorrência de dor com local, intensidade, tipo, irradiação, humor, alimentos e clima associado.
+- [x] Implementar seleção de dor exclusivamente por toques, desenhos e ícones, sem texto obrigatório.
+- [x] Correlacionar automaticamente cada ocorrência com o clima capturado no momento do registro.
+- [x] Criar relatório visual de correlações para discussão com médicos e exportação local.
+- [x] Criar testes para o novo modelo, agregações e fluxo visual de registro de dor.
+- [x] Revisar privacidade, contraste, tamanho dos alvos de toque e funcionamento offline no Android.
+
+### Histórico de solicitação
+
+- [x] Alterar o app para registrar ocorrências de dores crônicas e correlacioná-las com clima, humor e alimentação por meio de uma interface sem digitação.
+- [x] Considerar uma silhueta corporal interativa com seleção do local da dor e dos locais de irradiação.
+- [x] Incluir intensidades de 1 a 10, tipos de dor, emoções e categorias de alimentos por ícones.

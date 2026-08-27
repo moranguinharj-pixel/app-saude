@@ -5,7 +5,8 @@ import { weatherDescription } from "@/lib/weather";
 import { AppData } from "@/shared/records";
 
 const data: AppData = {
-  version: 1,
+  version: 2,
+  painEntries: [],
   healthEntries: [
     { id: "h-1", metricName: "Peso", value: 70, unit: "kg", category: "Geral", recordedAt: "2026-08-25T12:00:00.000Z" },
     { id: "h-2", metricName: "Peso", value: 72, unit: "kg", category: "Geral", recordedAt: "2026-08-24T12:00:00.000Z" },

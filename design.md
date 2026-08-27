@@ -75,3 +75,20 @@ A marca usa uma paleta serena que associa saúde, ambiente e organização pesso
 ## Limites da primeira versão
 
 A primeira versão não terá login, conta, sincronização entre aparelhos ou banco de dados remoto. O calendário será interno ao app e não modificará o calendário nativo do Android. A consulta meteorológica depende de localização e conexão no momento da captura; uma vez salvo, o dado permanece disponível offline.
+
+
+## Evolução: diário visual de dor crônica
+
+A tela inicial começa pelo registro de dor, com uma silhueta corporal grande, frente e costas, dividida em áreas táteis amplas. Cada toque em uma região abre um fluxo curto de escolhas visuais. O primeiro toque define o local principal; toques posteriores podem indicar irradiação, sem exigir digitação.
+
+| Etapa | Controle visual | Opções |
+|---|---|---|
+| Local da dor | Silhueta corporal frente/costas | Cabeça, face, pescoço, ombros, braços, peito, abdômen, costas, quadris, coxas, joelhos, pernas e pés. |
+| Intensidade | Dez botões numerados grandes com reforço de cor e rótulo acessível | 1 a 10, sem campo de texto. |
+| Tipo/sensação | Cartões com ícone e rótulo | Pulsante, dolorida, pontada, agulhada, choque, queimação, ardência, formigamento, dormência, pressão, peso, aperto, cólica, coceira, rasgando, contínua e intermitente. |
+| Irradiação | Silhueta secundária com seleção múltipla | As mesmas regiões corporais, com “não irradia” como opção explícita. |
+| Emoção | Emojis grandes e cores de apoio | Calmo, bem, preocupado, irritado, triste, ansioso, cansado, frustrado e sobrecarregado. |
+| Alimentação | Ícones de grupos ou itens | Chocolate, álcool, carboidratos, ultraprocessados, frituras, laticínios, glúten, açúcar, cafeína, carne processada, muito sal, alimento novo e “nenhum desses”. |
+| Clima | Captura automática no fechamento da ocorrência | Temperatura, sensação térmica, umidade, vento, condição e local aproximado; a localização é solicitada somente durante a ação. |
+
+Todos os passos usam retorno visual, alvos mínimos de 48 px, contraste alto e rótulos acessíveis para leitor de tela. O horário é preenchido automaticamente. O relatório apresenta associações observadas nos registros, nunca causalidade, diagnóstico ou recomendação de tratamento.
