@@ -26,3 +26,16 @@
 - [x] Alterar o app para registrar ocorrências de dores crônicas e correlacioná-las com clima, humor e alimentação por meio de uma interface sem digitação.
 - [x] Considerar uma silhueta corporal interativa com seleção do local da dor e dos locais de irradiação.
 - [x] Incluir intensidades de 1 a 10, tipos de dor, emoções e categorias de alimentos por ícones.
+
+- [ ] Adicionar cartões visuais para selecionar uma ou mais condições crônicas relacionadas à ocorrência.
+- [ ] Criar modo de registro rápido com condições favoritas e texto opcional.
+- [ ] Permitir múltiplos focos de dor detalhados na mesma ocorrência, cada um com condição e trajeto próprios.
+- [x] Atualizar histórico, correlações e relatório para exibir condições crônicas associadas.
+- [x] Validar acessibilidade e fluxo de registro com o mínimo de toques durante uma crise.
+- [ ] Confirmar a nomenclatura da condição descrita como “bursite nos ninhos” antes de fixá-la no vocabulário padrão.
+
+- [x] Remover a obrigatoriedade de selecionar uma condição crônica antes de salvar uma ocorrência.
+- [x] Manter condições conhecidas como campo opcional, sem usá-las como causa presumida.
+- [x] Criar associações automáticas por local, trajetória, intensidade, clima, humor, alimentos, horário e frequência.
+- [x] Exibir resultados como padrões observados com contagens e médias, sem afirmar causalidade ou diagnóstico.
+- [x] Atualizar o relatório médico e os testes para a análise sem causa informada.

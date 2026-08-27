@@ -1,4 +1,4 @@
-import { bodySiteLabel, emotionLabel, foodLabel, PainEntry, painTypeLabel } from "@/shared/records";
+import { bodySiteDetailLabel, chronicConditionLabel, emotionLabel, foodLabel, PainEntry, painTypeLabel } from "@/shared/records";
 
 export function isWithinPeriod(value: string, days: number, now = new Date()) {
   const start = new Date(now);
@@ -18,9 +18,10 @@ function rankedCounts(values: string[], labelFor: (value: string) => string) {
 export function buildPainReport(entries: PainEntry[], days: number, now = new Date()) {
   const periodEntries = entries.filter((entry) => isWithinPeriod(entry.occurredAt, days, now));
   const intensityAverage = periodEntries.length ? periodEntries.reduce((sum, entry) => sum + entry.intensity, 0) / periodEntries.length : 0;
-  const sites = rankedCounts(periodEntries.map((entry) => entry.primarySite), bodySiteLabel);
+  const sites = rankedCounts(periodEntries.map((entry) => entry.primaryDetail ?? entry.primarySite), bodySiteDetailLabel);
   const types = rankedCounts(periodEntries.flatMap((entry) => entry.painTypes), painTypeLabel);
-  const radiation = rankedCounts(periodEntries.flatMap((entry) => entry.radiationSites), bodySiteLabel);
+  const conditions = rankedCounts(periodEntries.flatMap((entry) => entry.conditions ?? []), chronicConditionLabel);
+  const radiation = rankedCounts(periodEntries.flatMap((entry) => entry.radiationDetails?.length ? entry.radiationDetails : entry.radiationSites), bodySiteDetailLabel);
   const emotions = rankedCounts(periodEntries.map((entry) => entry.emotion), emotionLabel);
   const foods = rankedCounts(periodEntries.flatMap((entry) => entry.foods).filter((food) => food !== "none"), foodLabel);
   const weatherEntries = periodEntries.filter((entry) => entry.weather);
@@ -33,5 +34,5 @@ export function buildPainReport(entries: PainEntry[], days: number, now = new Da
     const matching = periodEntries.filter((entry) => entry.emotion === emotion.id);
     return { ...emotion, averageIntensity: matching.reduce((sum, entry) => sum + entry.intensity, 0) / matching.length };
   });
-  return { entries: periodEntries, intensityAverage, sites, radiation, types, emotions, foods: averageIntensityByFood, averageIntensityByEmotion, weatherAverage, weatherCount: weatherEntries.length };
+  return { entries: periodEntries, intensityAverage, sites, radiation, types, conditions, emotions, foods: averageIntensityByFood, averageIntensityByEmotion, weatherAverage, weatherCount: weatherEntries.length };
 }

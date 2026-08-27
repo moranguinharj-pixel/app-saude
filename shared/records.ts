@@ -51,6 +51,95 @@ export const BODY_SITES = [
 
 export type BodySiteId = (typeof BODY_SITES)[number]["id"];
 
+export const BODY_SITE_DETAILS = [
+  { id: "head-top", coarse: "head", label: "Topo da cabeça" },
+  { id: "forehead-left", coarse: "head", label: "Testa esquerda" },
+  { id: "forehead-right", coarse: "head", label: "Testa direita" },
+  { id: "above-eye-left", coarse: "face", label: "Acima do olho esquerdo" },
+  { id: "above-eye-right", coarse: "face", label: "Acima do olho direito" },
+  { id: "behind-eye-left", coarse: "face", label: "Atrás do olho esquerdo" },
+  { id: "behind-eye-right", coarse: "face", label: "Atrás do olho direito" },
+  { id: "temple-left", coarse: "face", label: "Têmpora esquerda" },
+  { id: "temple-right", coarse: "face", label: "Têmpora direita" },
+  { id: "cheek-left", coarse: "face", label: "Bochecha esquerda" },
+  { id: "cheek-right", coarse: "face", label: "Bochecha direita" },
+  { id: "jaw-left", coarse: "face", label: "Mandíbula esquerda" },
+  { id: "jaw-right", coarse: "face", label: "Mandíbula direita" },
+  { id: "behind-head-left", coarse: "head", label: "Atrás da cabeça, lado esquerdo" },
+  { id: "behind-head-right", coarse: "head", label: "Atrás da cabeça, lado direito" },
+  { id: "neck-front", coarse: "neck", label: "Frente do pescoço" },
+  { id: "neck-back", coarse: "neck", label: "Nuca" },
+  { id: "chest-left", coarse: "chest", label: "Peito esquerdo" },
+  { id: "chest-right", coarse: "chest", label: "Peito direito" },
+  { id: "chest-center", coarse: "chest", label: "Centro do peito" },
+  { id: "rib-left-upper", coarse: "chest", label: "Costelas esquerdas superiores" },
+  { id: "rib-right-upper", coarse: "chest", label: "Costelas direitas superiores" },
+  { id: "rib-left-lower", coarse: "chest", label: "Costelas esquerdas inferiores" },
+  { id: "rib-right-lower", coarse: "chest", label: "Costelas direitas inferiores" },
+  { id: "abdomen-left-upper", coarse: "abdomen", label: "Abdômen superior esquerdo" },
+  { id: "abdomen-right-upper", coarse: "abdomen", label: "Abdômen superior direito" },
+  { id: "abdomen-left-lower", coarse: "abdomen", label: "Abdômen inferior esquerdo" },
+  { id: "abdomen-right-lower", coarse: "abdomen", label: "Abdômen inferior direito" },
+  { id: "lower-belly-left", coarse: "abdomen", label: "Baixo ventre esquerdo" },
+  { id: "lower-belly-right", coarse: "abdomen", label: "Baixo ventre direito" },
+  { id: "flank-left", coarse: "abdomen", label: "Flanco esquerdo" },
+  { id: "flank-right", coarse: "abdomen", label: "Flanco direito" },
+  { id: "pelvis-left", coarse: "left-hip", label: "Região pélvica esquerda" },
+  { id: "pelvis-right", coarse: "right-hip", label: "Região pélvica direita" },
+  { id: "ovary-left", coarse: "left-hip", label: "Região próxima ao ovário esquerdo" },
+  { id: "ovary-right", coarse: "right-hip", label: "Região próxima ao ovário direito" },
+  { id: "groin-left", coarse: "left-hip", label: "Virilha esquerda" },
+  { id: "groin-right", coarse: "right-hip", label: "Virilha direita" },
+  { id: "lower-back-left", coarse: "lower-back", label: "Lombar esquerda" },
+  { id: "lower-back-right", coarse: "lower-back", label: "Lombar direita" },
+  { id: "upper-back-left", coarse: "upper-back", label: "Parte alta das costas esquerda" },
+  { id: "upper-back-right", coarse: "upper-back", label: "Parte alta das costas direita" },
+  { id: "hip-left-side", coarse: "left-hip", label: "Lateral do quadril esquerdo" },
+  { id: "hip-right-side", coarse: "right-hip", label: "Lateral do quadril direito" },
+  { id: "thigh-left-front", coarse: "left-thigh", label: "Coxa esquerda anterior" },
+  { id: "thigh-right-front", coarse: "right-thigh", label: "Coxa direita anterior" },
+  { id: "thigh-left-back", coarse: "left-thigh", label: "Coxa esquerda posterior" },
+  { id: "thigh-right-back", coarse: "right-thigh", label: "Coxa direita posterior" },
+  { id: "knee-left", coarse: "left-knee", label: "Joelho esquerdo" },
+  { id: "knee-right", coarse: "right-knee", label: "Joelho direito" },
+  { id: "calf-left", coarse: "left-leg", label: "Panturrilha esquerda" },
+  { id: "calf-right", coarse: "right-leg", label: "Panturrilha direita" },
+  { id: "shin-left", coarse: "left-leg", label: "Canela esquerda" },
+  { id: "shin-right", coarse: "right-leg", label: "Canela direita" },
+  { id: "leg-left-lateral", coarse: "left-leg", label: "Lateral da perna esquerda" },
+  { id: "leg-right-lateral", coarse: "right-leg", label: "Lateral da perna direita" },
+  { id: "ankle-left", coarse: "left-foot", label: "Tornozelo esquerdo" },
+  { id: "ankle-right", coarse: "right-foot", label: "Tornozelo direito" },
+  { id: "foot-left", coarse: "left-foot", label: "Pé esquerdo" },
+  { id: "foot-right", coarse: "right-foot", label: "Pé direito" },
+] as const;
+export type BodySiteDetailId = (typeof BODY_SITE_DETAILS)[number]["id"];
+export type BodySiteDetail = (typeof BODY_SITE_DETAILS)[number];
+
+export function bodySiteDetailLabel(id?: string) {
+  return BODY_SITE_DETAILS.find((site) => site.id === id)?.label ?? (id ? bodySiteLabel(id) : "Local não informado");
+}
+
+
+export const CHRONIC_CONDITIONS = [
+  { id: "fibromyalgia", label: "Fibromialgia", icon: "✦" },
+  { id: "endometriosis", label: "Endometriose", icon: "◌" },
+  { id: "fibroid", label: "Mioma", icon: "✿" },
+  { id: "ovarian-cyst", label: "Cisto no ovário", icon: "◉" },
+  { id: "breast-cysts", label: "Cistos nos seios", icon: "♡" },
+  { id: "migraine-aura", label: "Enxaqueca com aura", icon: "☼" },
+  { id: "disc-herniation", label: "Hérnia de disco", icon: "▥" },
+  { id: "hip-bursitis", label: "Bursite na bacia", icon: "◇" },
+  { id: "knee-bursitis", label: "Bursite no joelho", icon: "○" },
+  { id: "hand-tendinitis", label: "Tendinite na mão", icon: "✋" },
+  { id: "other-condition", label: "Outra condição", icon: "+" },
+  { id: "unknown-condition", label: "Não sei / sem relação", icon: "?" },
+] as const;
+
+export function chronicConditionLabel(id: string) {
+  return CHRONIC_CONDITIONS.find((condition) => condition.id === id)?.label ?? id;
+}
+
 export const PAIN_TYPES = [
   { id: "throbbing", label: "Pulsante", icon: "〰" },
   { id: "aching", label: "Dolorida", icon: "◉" },
@@ -103,7 +192,10 @@ export type PainEntry = {
   id: string;
   occurredAt: string;
   primarySite: BodySiteId;
+  primaryDetail?: BodySiteDetailId;
+  conditions?: string[];
   radiationSites: BodySiteId[];
+  radiationDetails?: BodySiteDetailId[];
   intensity: number;
   painTypes: string[];
   emotion: string;
@@ -141,7 +233,11 @@ export function makeId(prefix: string) {
 }
 
 export function bodySiteLabel(id: string) {
-  return BODY_SITES.find((site) => site.id === id)?.label ?? id;
+  return BODY_SITES.find((site) => site.id === id)?.label ?? bodySiteDetailLabelFallback(id);
+}
+
+function bodySiteDetailLabelFallback(id: string) {
+  return BODY_SITE_DETAILS.find((site) => site.id === id)?.label ?? id;
 }
 
 export function painTypeLabel(id: string) {

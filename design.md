@@ -92,3 +92,32 @@ A tela inicial começa pelo registro de dor, com uma silhueta corporal grande, f
 | Clima | Captura automática no fechamento da ocorrência | Temperatura, sensação térmica, umidade, vento, condição e local aproximado; a localização é solicitada somente durante a ação. |
 
 Todos os passos usam retorno visual, alvos mínimos de 48 px, contraste alto e rótulos acessíveis para leitor de tela. O horário é preenchido automaticamente. O relatório apresenta associações observadas nos registros, nunca causalidade, diagnóstico ou recomendação de tratamento.
+
+
+## Atualização: localização anatômica detalhada
+
+A seleção corporal será organizada em **frente** e **costas**, com lateralidade explícita quando aplicável. O app não tentará inferir anatomia a partir de um ponto aproximado: cada área tocável terá uma etiqueta descritiva que será exibida antes da confirmação e no relatório.
+
+| Região | Subáreas selecionáveis |
+|---|---|
+| Cabeça e face | Couro cabeludo esquerdo/direito, testa esquerda/direita, acima do olho esquerdo/direito, atrás do olho esquerdo/direito, têmpora esquerda/direita, bochecha esquerda/direita, mandíbula esquerda/direita, topo da cabeça, nuca esquerda/direita e atrás da cabeça. |
+| Pescoço e ombros | Frente do pescoço, nuca, ombro esquerdo/direito, clavícula esquerda/direita e base do pescoço. |
+| Tórax | Peito esquerdo/direito, centro do peito, costelas esquerdas/direitas superiores e inferiores, axila esquerda/direita e parte alta das costas esquerda/direita. |
+| Abdômen e costas | Abdômen superior/inferior esquerdo/direito, centro do abdômen, flanco esquerdo/direito, lombar esquerda/direita, meio das costas e sacro. |
+| Pelve | Região pélvica esquerda/direita, virilha esquerda/direita, baixo ventre esquerdo/direito, região próxima ao ovário esquerdo/direito, quadril esquerdo/direito e nádega esquerda/direita. A nomenclatura é descritiva e não indica diagnóstico ou origem da dor. |
+| Membros superiores | Braço esquerdo/direito anterior e posterior, cotovelo esquerdo/direito, antebraço esquerdo/direito, punho esquerdo/direito, mão esquerda/direita e dedos. |
+| Membros inferiores | Coxa esquerda/direita anterior e posterior, joelho esquerdo/direito, panturrilha esquerda/direita, canela esquerda/direita, tornozelo esquerdo/direito, pé esquerdo/direito e lateral externa/interna da perna. |
+
+### Fluxo para descrever uma dor irradiada
+
+1. O usuário toca no **ponto principal** da dor, por exemplo, “acima do olho esquerdo”.
+2. Na etapa seguinte, toca em um ou mais pontos na ordem em que deseja descrever o caminho da irradiação, por exemplo, “nuca” e “atrás da cabeça”. Cada ponto fica numerado visualmente.
+3. Para cada trecho selecionado, o usuário pode tocar em um tipo de sensação, como “queimação” ou “pontada”. Se uma única sensação servir para todo o trajeto, há um botão visual para aplicá-la ao caminho completo.
+4. O relatório apresenta a sequência com setas: **acima do olho esquerdo → nuca → atrás da cabeça**, acompanhada das sensações escolhidas. Nenhuma causa é inferida pelo aplicativo.
+
+Todos os alvos corporais terão área de toque ampliada, legenda acessível e estado selecionado com contorno e preenchimento, evitando depender apenas de cor. O registro poderá ser concluído sem digitação; a data e a hora serão preenchidas automaticamente.
+
+
+## Correção de princípio: descobrir associações sem presumir causa
+
+A etapa de condição crônica é **opcional**. O botão “Pular — ainda não sei a relação” permite salvar a ocorrência apenas com os dados observados. As condições conhecidas aparecem como contexto selecionável, não como explicação obrigatória. O relatório prioriza os padrões derivados de frequência e intensidade por local, irradiação, tipo de dor, humor, alimentação, horário e clima associado. A linguagem da interface usa “observado”, “registrado” e “para investigar com o médico”, evitando “causou”, “provoca” ou qualquer diagnóstico automático.
