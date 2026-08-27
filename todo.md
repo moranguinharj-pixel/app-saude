@@ -100,3 +100,7 @@
 - [x] Ajustar tela de emoções para grade 4×4, seleção múltipla e botão Próximo.
 - [x] Revisar tela de medicamentos preventivos e de controle, com dose, horário, adicionar/remover e histórico local.
 - [x] Validar histórico, edição do local, irradiação opcional e relatórios em fluxo completo.
+
+- [x] Diagnosticar por que o building não conclui na versão eca7a67d.
+- [x] Corrigir a falha de empacotamento sem regredir o mapa e os fluxos validados.
+- [x] Executar novamente TypeScript, testes e build completo antes de criar novo checkpoint.
