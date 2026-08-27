@@ -45,3 +45,7 @@
 - [x] Permitir frente e costas com confirmação visual mínima e sem exigir leitura dos nomes.
 - [x] Aumentar a confiabilidade com zonas anatômicas, alvo ampliado e feedback visual após o toque.
 - [x] Testar toques em cabeça, orelhas, olhos, pelve e membros no Android.
+
+- [x] Adicionar controles acessíveis de aumentar, reduzir e redefinir o zoom no mapa corporal.
+- [x] Permitir navegar pela imagem ampliada sem perder a precisão das coordenadas do toque.
+- [x] Validar zoom e seleção de áreas menores em tela móvel e no Android.
