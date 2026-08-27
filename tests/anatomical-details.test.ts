@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildPainReport } from "@/lib/pain-reports";
-import { PainEntry } from "@/shared/records";
+import { BODY_SITE_DETAILS, PainEntry, bodySiteDetailLabel } from "@/shared/records";
 
 describe("detalhamento anatômico da dor", () => {
   it("agrupa o ponto exato e os pontos de irradiação", () => {
@@ -25,5 +25,23 @@ describe("detalhamento anatômico da dor", () => {
       { id: "neck-back", label: "Nuca", count: 1 },
       { id: "behind-head-left", label: "Atrás da cabeça, lado esquerdo", count: 1 },
     ]);
+  });
+
+  it("mantém estruturas finas de mãos, pés, mamas, músculos e órgãos", () => {
+    const expectedIds = [
+      "right-thumb-cmc",
+      "right-little-toe",
+      "breast-right-axillary-tail",
+      "right-elbow-joint",
+      "right-quad",
+      "uterus",
+      "kidney-left",
+    ];
+
+    const ids = BODY_SITE_DETAILS.map((site) => site.id);
+    expectedIds.forEach((id) => expect(ids).toContain(id));
+    expect(bodySiteDetailLabel("right-thumb-cmc")).toContain("carpometacarpal");
+    expect(bodySiteDetailLabel("breast-right-axillary-tail")).toContain("axila");
+    expect(bodySiteDetailLabel("right-little-toe")).toContain("mínimo");
   });
 });

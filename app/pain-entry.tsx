@@ -11,7 +11,7 @@ import { addCustomFood, addFollowUp, addMedicationProfile, addPainEntry, loadApp
 import { formatDateTime } from "@/lib/format";
 import { getCurrentWeather } from "@/lib/weather";
 import { schedulePainFollowUp } from "@/lib/notifications";
-import { AppData, BODY_SITES, BodySiteDetailId, BodySiteId, EMOTIONS, FOOD_TRIGGERS, LOCAL_SYMPTOMS, LocalSymptomId, makeId, MedicationProfile, MedicationUse, PAIN_TYPES, PainEntry, FoodProfile, bodySiteLabel } from "@/shared/records";
+import { AppData, BODY_SITES, BODY_SITE_DETAILS, BodySiteDetailId, BodySiteId, EMOTIONS, FOOD_TRIGGERS, LOCAL_SYMPTOMS, LocalSymptomId, makeId, MedicationProfile, MedicationUse, PAIN_TYPES, PainEntry, FoodProfile, bodySiteLabel } from "@/shared/records";
 import { ScreenContainer } from "@/components/screen-container";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
@@ -54,7 +54,21 @@ export default function PainEntryScreen() {
   const selectPrimaryDetail = (id: BodySiteDetailId) => setPrimaryDetail(id);
   const toggle = <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, id: T) => setter((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
   const toggleRadiation = (site: BodySiteId) => { setNoRadiation(false); setRadiationSites((current) => current.includes(site) ? current.filter((value) => value !== site) : [...current, site]); };
-  const toggleRadiationDetail = (id: BodySiteDetailId) => { setNoRadiation(false); toggle(setRadiationDetails, id); };
+  const toggleRadiationDetail = (id: BodySiteDetailId) => {
+    setNoRadiation(false);
+    setRadiationDetails((current) => {
+      const next = current.includes(id) ? current.filter((value) => value !== id) : [...current, id];
+      const coarse = BODY_SITE_DETAILS.find((site) => site.id === id)?.coarse;
+      if (coarse) {
+        setRadiationSites((sites) => {
+          const hasAnotherDetail = next.some((detailId) => BODY_SITE_DETAILS.find((site) => site.id === detailId)?.coarse === coarse);
+          if (hasAnotherDetail) return sites.includes(coarse) ? sites : [...sites, coarse];
+          return sites.filter((site) => site !== coarse);
+        });
+      }
+      return next;
+    });
+  };
   const toggleFood = (id: string) => toggle(setFoods, id);
   const addQuickMedication = async (profile: MedicationProfile, purpose: MedicationUse["purpose"]) => { const use: MedicationUse = { ...profile, purpose, takenAt: new Date().toISOString() }; setMedications((current) => [...current, use]); await addMedicationProfile(profile); };
   const addCustomMedication = async (purpose: MedicationUse["purpose"]) => { const name = customMedication.trim(); if (!name) return; const profile = { id: makeId("med"), name, dose: customMedicationDose.trim() || undefined }; const use: MedicationUse = { ...profile, purpose, takenAt: customMedicationTime.trim() || new Date().toISOString() }; setMedications((current) => [...current, use]); await addMedicationProfile(profile); setCustomMedication(""); setCustomMedicationDose(""); setCustomMedicationTime(""); };

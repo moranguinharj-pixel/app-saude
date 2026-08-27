@@ -83,3 +83,11 @@
 - [x] Corrigir a seleção de cabeça e face para aceitar topo da cabeça, testa, olhos, abaixo dos olhos, bochechas, nariz, mandíbula, orelhas e nuca.
 - [x] Ampliar as áreas de toque ao redor do desenho sem perder a distinção anatômica.
 - [x] Validar essas zonas no zoom e no fluxo de irradiação.
+
+- [x] Criar hierarquia corpo geral → região → submapa detalhado para seleção anatômica.
+- [x] Adicionar submapa de mãos com dedos, falanges, metacarpos e articulações, incluindo a base do polegar.
+- [x] Adicionar submapa de pés com dedos, falanges, metatarsos e articulações, incluindo o dedinho direito.
+- [x] Adicionar submapa de mamas e axilas com lateralidade e quadrantes.
+- [x] Expandir pontos de articulações, músculos e órgãos com coordenadas específicas.
+- [x] Preservar zoom, coordenadas, histórico e relatórios com o ponto mais específico selecionado.
+- [x] Validar toque fino em todas as sub-regiões no preview móvel e por testes de coordenadas; falta apenas confirmação em um dispositivo Android físico.
