@@ -104,3 +104,6 @@
 - [x] Diagnosticar por que o building não conclui na versão eca7a67d.
 - [x] Corrigir a falha de empacotamento sem regredir o mapa e os fluxos validados.
 - [x] Executar novamente TypeScript, testes e build completo antes de criar novo checkpoint.
+
+- [x] Versão 9: tornar a identificação da versão mais clara na tela Sobre, sem alterar dados ou fluxos.
+- [x] Validar a melhoria visual e criar checkpoint para nova tentativa de compilação Android.
