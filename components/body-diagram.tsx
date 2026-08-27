@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { PinchGestureHandler, State } from "react-native-gesture-handler";
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
 
-import { BodySiteDetailId, BodySiteId } from "@/shared/records";
+import { BodySiteDetailId, BodySiteId, bodySiteDetailLabel } from "@/shared/records";
 
 type Point = { id: BodySiteDetailId; coarse: BodySiteId; x: number; y: number };
 export type Side = "front" | "back" | "left" | "right";
@@ -274,6 +275,8 @@ function pointsForMap(kind: MapKind, site: BodySiteId): Point[] {
 export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onSelectDetail, multi = false, side, onSideChange }: { selected?: BodySiteId[]; selectedDetails?: BodySiteDetailId[]; onSelect: (site: BodySiteId) => void; onSelectDetail?: (detail: BodySiteDetailId) => void; multi?: boolean; side: Side; onSideChange: (side: Side) => void }) {
   const [zoom, setZoom] = useState(1);
   const [activeMap, setActiveMap] = useState<{ kind: MapKind; site: BodySiteId }>();
+  const [pinchStartZoom, setPinchStartZoom] = useState(1);
+  const [lastSelectedPoint, setLastSelectedPoint] = useState<Point>();
   const rootPoints = rootPointsForSide(side);
   const points = activeMap ? pointsForMap(activeMap.kind, activeMap.site) : rootPoints;
   const mapWidth = activeMap ? 300 : MAP_WIDTH;
@@ -287,6 +290,17 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
   const zoomIn = () => setZoom((value) => Math.min(activeMap ? 3 : 2.5, Number((value + 0.5).toFixed(1))));
   const zoomOut = () => setZoom((value) => Math.max(1, Number((value - 0.5).toFixed(1))));
   const resetZoom = () => setZoom(1);
+  const handlePinchStateChange = (event: any) => {
+    if (event.nativeEvent.state === State.BEGAN) setPinchStartZoom(zoom);
+    if (event.nativeEvent.state === State.END || event.nativeEvent.state === State.CANCELLED) {
+      setZoom((value) => Math.max(1, Math.min(9, Number(value.toFixed(2)))));
+    }
+  };
+  const handlePinch = (event: any) => {
+    if (event.nativeEvent.state === State.ACTIVE) {
+      setZoom(Math.max(1, Math.min(9, Number((pinchStartZoom * event.nativeEvent.scale).toFixed(2)))));
+    }
+  };
 
   const handleMapPress = (event: any) => {
     const { locationX, locationY } = event.nativeEvent;
@@ -297,24 +311,27 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
       const kind = mapKindForSite(nearest.coarse);
       if (kind) {
         setActiveMap({ kind, site: nearest.coarse });
+        setLastSelectedPoint(nearest);
         setZoom(1);
         return;
       }
+      setLastSelectedPoint(nearest);
       onSelect(nearest.coarse);
       onSelectDetail?.(nearest.id);
       return;
     }
     const nearest = resolveDetailPoint(points, normalizedX, normalizedY);
+    setLastSelectedPoint(nearest);
     onSelect(nearest.coarse);
     onSelectDetail?.(nearest.id);
   };
 
-  const closeMap = () => { setActiveMap(undefined); setZoom(1); };
+  const closeMap = () => { setActiveMap(undefined); setLastSelectedPoint(undefined); setZoom(1); };
   const mapLabel = activeMap ? activeMap.kind === "face" ? "Mapa ampliado da cabeça e face" : activeMap.kind === "chest" ? "Mapa ampliado do peito, mamas e axilas" : activeMap.kind === "hand" ? "Mapa ampliado da mão" : activeMap.kind === "foot" ? "Mapa ampliado do pé" : "Mapa ampliado da região" : `Mapa corporal ${side === "front" ? "frontal" : side === "back" ? "posterior" : side === "left" ? "lateral esquerda" : "lateral direita"}`;
 
   return <View style={styles.root}>
     {activeMap ? <View style={styles.detailHeader}><Pressable accessibilityRole="button" accessibilityLabel="Voltar ao corpo inteiro" onPress={closeMap} style={styles.backButton}><Text style={styles.backText}>‹</Text></Pressable><View style={styles.detailTitleWrap}><Text style={styles.detailTitle}>{mapLabel}</Text><Text style={styles.detailHint}>Toque no ponto exato da dor</Text></View></View> : <View style={styles.sideToggle}><Pressable accessibilityRole="button" accessibilityLabel="Vista frontal" accessibilityState={{ selected: side === "front" }} onPress={() => onSideChange("front")} style={[styles.sideButton, side === "front" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "front" && styles.sideTextActive]}>Frente</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista posterior" accessibilityState={{ selected: side === "back" }} onPress={() => onSideChange("back")} style={[styles.sideButton, side === "back" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "back" && styles.sideTextActive]}>Costas</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral esquerda" accessibilityState={{ selected: side === "left" }} onPress={() => onSideChange("left")} style={[styles.sideButton, side === "left" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "left" && styles.sideTextActive]}>Lateral E</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral direita" accessibilityState={{ selected: side === "right" }} onPress={() => onSideChange("right")} style={[styles.sideButton, side === "right" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "right" && styles.sideTextActive]}>Lateral D</Text></Pressable></View>}
-    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Diminuir zoom" accessibilityState={{ disabled: zoom <= 1 }} disabled={zoom <= 1} onPress={zoomOut} style={[styles.zoomButton, zoom <= 1 && styles.zoomDisabled]}><Text style={styles.zoomText}>−</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>{zoom.toFixed(1)}×</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Aumentar zoom" accessibilityState={{ disabled: zoom >= (activeMap ? 3 : 2.5) }} disabled={zoom >= (activeMap ? 3 : 2.5)} onPress={zoomIn} style={[styles.zoomButton, zoom >= (activeMap ? 3 : 2.5) && styles.zoomDisabled]}><Text style={styles.zoomText}>+</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: mapWidth * zoom, height: mapHeight * zoom }]}>{!activeMap && <AnatomicalAsset side={side} width={mapWidth * zoom} height={mapHeight * zoom} />}<Svg width={mapWidth * zoom} height={mapHeight * zoom} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none">{activeMap ? <DetailArt kind={activeMap.kind} site={activeMap.site} /> : <G opacity={0.08}>{side === "front" || side === "back" ? <BodyArt side={side} /> : <LateralBodyArt side={side} />}</G>}<Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{activeMap && points.map((point) => <Circle key={`target-${point.id}`} cx={point.x * mapWidth} cy={point.y * mapHeight} r={selectedDetails.includes(point.id) ? 9 : 5} fill={selectedDetails.includes(point.id) ? "#E98B5A" : "#8FB7C1"} opacity={selectedDetails.includes(point.id) ? 1 : 0.65} />)}</Svg>{selectedPoints.map((point) => <View key={point.id} pointerEvents="none" style={[styles.selection, { left: point.x * mapWidth * zoom - 14, top: point.y * mapHeight * zoom - 14 }]}><Text style={styles.selectionText}>•</Text></View>)}</Pressable></ScrollView></ScrollView></View></View><Text style={styles.helper}>{activeMap ? "Aproxime mais se necessário; cada ponto representa uma sub-região anatômica." : multi ? "Toque em uma região para abrir seu submapa detalhado." : "Toque em uma região; o app abrirá o submapa mais preciso."}</Text>
+    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>Pinça · {zoom.toFixed(1)}×</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><PinchGestureHandler onGestureEvent={handlePinch} onHandlerStateChange={handlePinchStateChange}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: mapWidth * zoom, height: mapHeight * zoom }]}>{!activeMap && <AnatomicalAsset side={side} width={mapWidth * zoom} height={mapHeight * zoom} />}<Svg width={mapWidth * zoom} height={mapHeight * zoom} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none">{activeMap ? <DetailArt kind={activeMap.kind} site={activeMap.site} /> : <G opacity={0.08}>{side === "front" || side === "back" ? <BodyArt side={side} /> : <LateralBodyArt side={side} />}</G>}<Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{activeMap && points.map((point) => <Circle key={`target-${point.id}`} cx={point.x * mapWidth} cy={point.y * mapHeight} r={selectedDetails.includes(point.id) ? 9 : 5} fill={selectedDetails.includes(point.id) ? "#E98B5A" : "#8FB7C1"} opacity={selectedDetails.includes(point.id) ? 1 : 0.65} />)}</Svg>{selectedPoints.map((point) => <View key={point.id} pointerEvents="none" style={[styles.selection, { left: point.x * mapWidth * zoom - 14, top: point.y * mapHeight * zoom - 14 }]}><Text style={styles.selectionText}>•</Text></View>)}</Pressable></PinchGestureHandler></ScrollView></ScrollView></View></View>{lastSelectedPoint && <Text style={styles.selectedLabel}>{bodySiteDetailLabel(lastSelectedPoint.id)}</Text>}<Text style={styles.helper}>{activeMap ? "Aproxime mais se necessário; cada ponto representa uma sub-região anatômica." : multi ? "Toque em uma região para abrir seu submapa detalhado." : "Toque em uma região; o app abrirá o submapa mais preciso."}</Text>
   </View>;
 }
 
@@ -345,7 +362,7 @@ function resolveDetailPoint(points: Point[], rawX: number, rawY: number): Point 
   }, { point: points[0], distance: Number.POSITIVE_INFINITY }).point;
 }
 
-const ANATOMICAL_ASSETS: Record<Side, string> = { front: "/manus-storage/body-front-reference_4f19f629.png", back: "/manus-storage/body-back_b6ac60d2.png", left: "/manus-storage/body-left-profile_2976e60e.png", right: "/manus-storage/body-right-profile_469f22b2.png" };
+const ANATOMICAL_ASSETS: Record<Side, string> = { front: "/manus-storage/anatomical-front-reference_e3117f39.png", back: "/manus-storage/anatomical-back_1705cec6.png", left: "/manus-storage/anatomical-left-profile_5393b7e8.png", right: "/manus-storage/anatomical-right-profile_728927a0.png" };
 
 function AnatomicalAsset({ side, width, height }: { side: Side; width: number; height: number }) { return <View pointerEvents="none" style={[styles.anatomicalAsset, { width, height }]}><Image source={{ uri: ANATOMICAL_ASSETS[side] }} resizeMode="contain" style={StyleSheet.absoluteFillObject} /></View>; }
 
@@ -402,7 +419,7 @@ function BodyArt({ side }: { side: "front" | "back" }) {
 }
 
 const MAP_WIDTH = 250;
-const MAP_HEIGHT = 455;
+const MAP_HEIGHT = 420;
 const styles = StyleSheet.create({
   root: { alignItems: "center" },
   detailHeader: { alignItems: "center", flexDirection: "row", marginBottom: 8, maxWidth: 304, width: "100%" },
@@ -417,6 +434,7 @@ const styles = StyleSheet.create({
   zoomText: { color: "#FFFFFF", fontSize: 30, fontWeight: "700", lineHeight: 32 },
   zoomValue: { alignItems: "center", backgroundColor: "#EAF4F7", borderColor: "#BCD0D6", borderRadius: 14, borderWidth: 1, height: 48, justifyContent: "center", minWidth: 76, paddingHorizontal: 12 },
   zoomValueText: { color: "#176B87", fontSize: 15, fontWeight: "800" },
+  selectedLabel: { color: "#17313A", fontSize: 16, fontWeight: "800", marginTop: 8, textAlign: "center" },
   viewport: { backgroundColor: "#F7FAFC", borderRadius: 16, height: 516, overflow: "hidden", width: 304 },
   scrollContent: { alignItems: "center", flexGrow: 1, justifyContent: "center", minHeight: 516, minWidth: 304 },
   sideToggle: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 8, maxWidth: 304, padding: 4, width: "100%" },

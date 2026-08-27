@@ -134,6 +134,16 @@
 - [x] Manter pontos livres, zoom e conversão X/Y alinhados aos novos desenhos.
 - [x] Validar que o APK/preview mostre o novo visual após a atualização.
 
-- [ ] Criar commit da versão 10 com o estado atual do módulo corporal anatômico.
-- [ ] Enviar a versão 10 para a branch `main` do repositório privado `app-saude`.
-- [ ] Validar no GitHub o commit e o histórico preservado da versão 9.
+- [x] Criar commit da versão 10 com o estado atual do módulo corporal anatômico.
+- [x] Enviar a versão 10 para a branch `main` do repositório privado `app-saude`.
+- [x] Validar no GitHub o commit e o histórico preservado da versão 9.
+
+- [x] Criar ilustração anatômica original com musculatura e contornos corporais visíveis, inspirada nas referências enviadas.
+- [x] Gerar vistas coerentes de frente, costas, lateral esquerda e lateral direita, sem copiar imagens protegidas.
+- [x] Distribuir pontos de toque livre sobre a imagem e manter conversão X/Y para regiões anatômicas.
+- [x] Recalibrar zoom, lateralidade e submapas sobre as novas ilustrações.
+
+- [x] Mostrar abaixo do mapa o nome anatômico correspondente ao último toque X/Y, incluindo lateralidade.
+- [x] Implementar zoom por gesto de pinça com dois dedos, limitado a 9×.
+- [x] Remover os botões de aumentar/reduzir zoom e manter redefinição discreta.
+- [x] Validar que o gesto não desloca a coordenada anatômica selecionada.
