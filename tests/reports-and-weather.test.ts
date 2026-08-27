@@ -20,6 +20,7 @@ const data: AppData = {
   medicationHistory: [],
   customFoods: [],
   followUps: [],
+  notifications: [],
   deletedPainEntries: [],
 };
 

@@ -114,8 +114,14 @@
 - [x] Integrar o novo atlas ao zoom, irradiação, histórico e edição do local.
 - [x] Validar pontos anatômicos e layout móvel antes de criar a próxima versão.
 
-- [ ] Verificar e conectar o projeto Registro Pessoal a um repositório GitHub autorizado.
-- [ ] Sincronizar o código com o repositório GitHub e validar o envio.
+- [x] Verificar e conectar o projeto Registro Pessoal a um repositório GitHub autorizado.
+- [x] Sincronizar o código com o repositório GitHub e validar o envio.
 
-- [ ] Criar o repositório privado `app-saude` no GitHub.
-- [ ] Conectar o projeto Registro Pessoal ao remoto GitHub e enviar o código atual.
+- [x] Criar o repositório privado `app-saude` no GitHub.
+- [x] Conectar o projeto Registro Pessoal ao remoto GitHub e enviar o código atual.
+
+- [x] Criar central interna para visualizar notificações e lembretes do app.
+- [x] Persistir localmente notificações lidas/não lidas e permitir marcar como lidas.
+- [x] Adicionar badge e navegação para notificações e acompanhamentos de dor.
+- [x] Integrar a central ao agendamento de lembretes de 2 horas sem duplicar registros.
+- [x] Validar a central no Android/preview e criar checkpoint.

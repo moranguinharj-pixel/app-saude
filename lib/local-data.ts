@@ -27,6 +27,7 @@ export async function loadAppData(): Promise<AppData> {
       medicationHistory: Array.isArray(parsed.medicationHistory) ? parsed.medicationHistory : [],
       customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
       followUps: Array.isArray(parsed.followUps) ? parsed.followUps : [],
+      notifications: Array.isArray(parsed.notifications) ? parsed.notifications : [],
       deletedPainEntries: Array.isArray(parsed.deletedPainEntries) ? parsed.deletedPainEntries : [],
     };
   } catch {
@@ -40,6 +41,10 @@ export async function addWeatherEntry(entry: WeatherEntry) { const data = await 
 export async function addPainEntry(entry: PainEntry) { const data = await loadAppData(); const nextData = { ...data, painEntries: sortByMostRecent([entry, ...data.painEntries]) }; await saveAppData(nextData); return nextData; }
 export async function updatePainEntry(entry: PainEntry) { const data = await loadAppData(); const nextData = { ...data, painEntries: sortByMostRecent(data.painEntries.map((item) => item.id === entry.id ? entry : item)) }; await saveAppData(nextData); return nextData; }
 export async function addFollowUp(followUp: AppData["followUps"][number]) { const data = await loadAppData(); const nextData = { ...data, followUps: [...data.followUps.filter((item) => item.id !== followUp.id), followUp] }; await saveAppData(nextData); return nextData; }
+export async function addInAppNotification(notification: AppData["notifications"][number]) { const data = await loadAppData(); const nextData = { ...data, notifications: [notification, ...data.notifications.filter((item) => item.id !== notification.id)] }; await saveAppData(nextData); return nextData; }
+export async function markNotificationRead(id: string) { const data = await loadAppData(); const nextData = { ...data, notifications: data.notifications.map((item) => item.id === id ? { ...item, readAt: item.readAt ?? new Date().toISOString() } : item) }; await saveAppData(nextData); return nextData; }
+export async function clearReadNotifications() { const data = await loadAppData(); const nextData = { ...data, notifications: data.notifications.filter((item) => !item.readAt) }; await saveAppData(nextData); return nextData; }
+export async function markAllNotificationsRead() { const data = await loadAppData(); const readAt = new Date().toISOString(); const nextData = { ...data, notifications: data.notifications.map((item) => ({ ...item, readAt: item.readAt ?? readAt })) }; await saveAppData(nextData); return nextData; }
 export async function updateFollowUp(id: string, patch: Partial<AppData["followUps"][number]>) { const data = await loadAppData(); const nextData = { ...data, followUps: data.followUps.map((item) => item.id === id ? { ...item, ...patch } : item) }; await saveAppData(nextData); return nextData; }
 export async function addMedicationProfile(profile: MedicationProfile) { const data = await loadAppData(); const history = data.medicationHistory.some((item) => item.name.toLowerCase() === profile.name.toLowerCase()) ? data.medicationHistory : [...data.medicationHistory, profile]; const nextData = { ...data, medicationHistory: history }; await saveAppData(nextData); return nextData; }
 export async function addCustomFood(profile: FoodProfile) { const data = await loadAppData(); const foods = data.customFoods.some((item) => item.label.toLowerCase() === profile.label.toLowerCase()) ? data.customFoods : [...data.customFoods, profile]; const nextData = { ...data, customFoods: foods }; await saveAppData(nextData); return nextData; }

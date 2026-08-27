@@ -433,6 +433,17 @@ export type PainFollowUp = {
   nextMedicationName?: string;
 };
 
+export type InAppNotification = {
+  id: string;
+  kind: "pain-follow-up" | "system";
+  title: string;
+  body: string;
+  createdAt: string;
+  readAt?: string;
+  followUpId?: string;
+  painEntryId?: string;
+};
+
 export type PainEntry = {
   id: string;
   occurredAt: string;
@@ -472,6 +483,7 @@ export type AppData = {
   medicationHistory: MedicationProfile[];
   customFoods: FoodProfile[];
   followUps: PainFollowUp[];
+  notifications: InAppNotification[];
   deletedPainEntries: PainEntry[];
 };
 
@@ -484,6 +496,7 @@ export const EMPTY_APP_DATA: AppData = {
   medicationHistory: [],
   customFoods: [],
   followUps: [],
+  notifications: [],
   deletedPainEntries: [],
 };
 
