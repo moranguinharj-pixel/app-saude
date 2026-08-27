@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
+import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 
 export function NotificationObserver() {
   const router = useRouter();
   useEffect(() => {
+    if (Platform.OS === "web") return;
     const openNotification = (notification: Notifications.Notification) => {
       const url = notification.request.content.data?.url;
       if (typeof url === "string") router.push(url as never);

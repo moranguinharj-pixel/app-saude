@@ -74,3 +74,5 @@
 - [x] Criar tela Configurações para medicamentos, alimentos, dados, notificações e privacidade.
 - [x] Adicionar exportação CSV/PDF e opção de backup local automático.
 - [x] Avaliar sincronização manual com Google Sheets sem ativá-la sem autorização explícita.
+
+- [x] Corrigir o observador de notificações para não chamar APIs nativas indisponíveis no preview web.
