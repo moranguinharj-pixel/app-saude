@@ -22,7 +22,7 @@ export default function PainEntryScreen() {
   const params = useLocalSearchParams<{ site?: string }>();
   const initialSite = BODY_SITES.some((site) => site.id === params.site) ? (params.site as BodySiteId) : undefined;
   const [step, setStep] = useState<Step>(1);
-  const [side, setSide] = useState<"front" | "back">("front");
+  const [side, setSide] = useState<"front" | "back" | "left" | "right">("front");
   const [primarySite, setPrimarySite] = useState<BodySiteId | undefined>(initialSite);
   const [primaryDetail, setPrimaryDetail] = useState<BodySiteDetailId | undefined>();
   const [intensity, setIntensity] = useState<number>();

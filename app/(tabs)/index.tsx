@@ -17,7 +17,7 @@ import { ScreenContainer } from "@/components/screen-container";
 export default function HomeScreen() {
   const router = useRouter();
   const [data, setData] = useState<AppData>(EMPTY_APP_DATA);
-  const [side, setSide] = useState<"front" | "back">("front");
+  const [side, setSide] = useState<"front" | "back" | "left" | "right">("front");
   useFocusEffect(useCallback(() => { loadAppData().then(setData); }, []));
   const latestPain = data.painEntries[0];
   const latestWeather = data.weatherEntries[0];

@@ -1,13 +1,13 @@
 # Notas de nomenclatura anatômica
 
-A expansão do mapa usa uma hierarquia de região, sub-região e estrutura, sempre com lateralidade quando aplicável. A posição anatômica padronizada reduz ambiguidade entre direita/esquerda, anterior/posterior, medial/lateral, proximal/distal e superficial/profundo.
+O novo mapa usa a posição anatômica como referência: corpo ereto, vistas anterior e posterior padronizadas, mãos voltadas anteriormente e lateralidade definida pela perspectiva da própria pessoa. A nomenclatura seguirá regiões de superfície e não inferirá diagnóstico a partir do ponto tocado.
 
-Para mãos, o atlas diferencia punho, palma, dorso, dedos, falanges e articulações metacarpofalângicas, interfalângicas proximais/distais e carpometacarpal do polegar. Para pés, diferencia tornozelo interno/externo, calcanhar, arco plantar, metatarsos, dedão, dedos e regiões digitais.
+As quatro vistas serão sistemas independentes: anterior (frente), posterior (costas), lateral esquerda e lateral direita. Cada uma manterá seu próprio viewBox e conversão X/Y, sem reutilizar offsets entre desenhos.
 
-Para mamas e axilas, foram incluídos quadrantes, mamilo, prolongamento axilar e axila com lateralidade. Para estruturas musculoesqueléticas e profundas, foram adicionadas articulações, grupos musculares e regiões de órgãos, descritas como região de referência no mapa — o app não interpreta nem diagnostica a causa da dor.
+A taxonomia inclui cabeça/face, pescoço, tórax, mamas, axila, abdômen, pelve, ombro, braço, cotovelo, antebraço, punho, mão, coxa, joelho, perna, tornozelo e pé. Para maior precisão, serão usados termos como orbital/ocular, bucal, nasal, cervical, axilar, braquial, antebraquial, carpiano, palmar/dorsal, femoral, patelar, crural, tarsal, plantar e digital/falangeal.
 
 Referências consultadas:
 
-- Cleveland Clinic. “Joints”. https://my.clevelandclinic.org/health/body/25137-joints
-- NCBI Bookshelf / StatPearls. “Anatomy, Joints”. https://www.ncbi.nlm.nih.gov/books/NBK507893/
-- OpenStax. “1.6 Anatomical Terminology”. https://openstax.org/books/anatomy-and-physiology/pages/1-6-anatomical-terminology
+- Oregon State University, “Anatomical Terminology”. https://open.oregonstate.education/anatomy2e/chapter/anatomical-terminology/
+- OpenStax, “1.6 Anatomical Terminology”. https://openstax.org/books/anatomy-and-physiology/pages/1-6-anatomical-terminology
+- Kenhub, “Anatomical terminology”. https://www.kenhub.com/en/library/anatomy/anatomical-terminology

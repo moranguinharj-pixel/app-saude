@@ -18,7 +18,7 @@ export default function PainDetailScreen() {
   const [draftSite, setDraftSite] = useState<BodySiteId>();
   const [draftDetail, setDraftDetail] = useState<BodySiteDetailId>();
   const [editingLocation, setEditingLocation] = useState(false);
-  const [side, setSide] = useState<"front" | "back">("front");
+  const [side, setSide] = useState<"front" | "back" | "left" | "right">("front");
   const [saving, setSaving] = useState(false);
   useEffect(() => { loadAppData().then((data) => { const found = data.painEntries.find((item) => item.id === id); setEntry(found); setNote(found?.followUpNote ?? ""); setDraftSite(found?.primarySite); setDraftDetail(found?.primaryDetail); }); }, [id]);
   if (!entry) return <ScreenContainer className="px-5" edges={["top", "bottom", "left", "right"]}><View style={styles.center}><Text style={styles.title}>Ocorrência não encontrada</Text><PrimaryButton label="Voltar" onPress={() => router.back()} /></View></ScreenContainer>;

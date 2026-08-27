@@ -107,3 +107,9 @@
 
 - [x] Versão 9: tornar a identificação da versão mais clara na tela Sobre, sem alterar dados ou fluxos.
 - [x] Validar a melhoria visual e criar checkpoint para nova tentativa de compilação Android.
+
+- [x] Redesenhar o módulo corporal com vistas frente, costas, lateral esquerda e lateral direita.
+- [x] Permitir toque livre em qualquer ponto da imagem e preservar coordenadas X/Y por vista.
+- [x] Criar conversão anatômica específica para cada vista, sem reutilizar offsets entre desenhos.
+- [x] Integrar o novo atlas ao zoom, irradiação, histórico e edição do local.
+- [x] Validar pontos anatômicos e layout móvel antes de criar a próxima versão.
