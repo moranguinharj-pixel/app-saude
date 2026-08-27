@@ -19,6 +19,7 @@ const data: AppData = {
   calendarEntries: [{ id: "c-1", title: "Consulta", category: "Saúde", startsAt: "2026-08-25T13:00:00.000Z" }],
   medicationHistory: [],
   customFoods: [],
+  followUps: [],
 };
 
 describe("relatórios locais", () => {

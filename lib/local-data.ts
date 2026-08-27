@@ -26,6 +26,7 @@ export async function loadAppData(): Promise<AppData> {
       painEntries: Array.isArray(parsed.painEntries) ? sortByMostRecent(parsed.painEntries) : [],
       medicationHistory: Array.isArray(parsed.medicationHistory) ? parsed.medicationHistory : [],
       customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
+      followUps: Array.isArray(parsed.followUps) ? parsed.followUps : [],
     };
   } catch {
     return EMPTY_APP_DATA;
@@ -36,6 +37,9 @@ export async function saveAppData(data: AppData) { await AsyncStorage.setItem(ST
 export async function addHealthEntry(entry: HealthEntry) { const data = await loadAppData(); const nextData = { ...data, healthEntries: sortByMostRecent([entry, ...data.healthEntries]) }; await saveAppData(nextData); return nextData; }
 export async function addWeatherEntry(entry: WeatherEntry) { const data = await loadAppData(); const nextData = { ...data, weatherEntries: sortByMostRecent([entry, ...data.weatherEntries]) }; await saveAppData(nextData); return nextData; }
 export async function addPainEntry(entry: PainEntry) { const data = await loadAppData(); const nextData = { ...data, painEntries: sortByMostRecent([entry, ...data.painEntries]) }; await saveAppData(nextData); return nextData; }
+export async function updatePainEntry(entry: PainEntry) { const data = await loadAppData(); const nextData = { ...data, painEntries: sortByMostRecent(data.painEntries.map((item) => item.id === entry.id ? entry : item)) }; await saveAppData(nextData); return nextData; }
+export async function addFollowUp(followUp: AppData["followUps"][number]) { const data = await loadAppData(); const nextData = { ...data, followUps: [...data.followUps.filter((item) => item.id !== followUp.id), followUp] }; await saveAppData(nextData); return nextData; }
+export async function updateFollowUp(id: string, patch: Partial<AppData["followUps"][number]>) { const data = await loadAppData(); const nextData = { ...data, followUps: data.followUps.map((item) => item.id === id ? { ...item, ...patch } : item) }; await saveAppData(nextData); return nextData; }
 export async function addMedicationProfile(profile: MedicationProfile) { const data = await loadAppData(); const history = data.medicationHistory.some((item) => item.name.toLowerCase() === profile.name.toLowerCase()) ? data.medicationHistory : [...data.medicationHistory, profile]; const nextData = { ...data, medicationHistory: history }; await saveAppData(nextData); return nextData; }
 export async function addCustomFood(profile: FoodProfile) { const data = await loadAppData(); const foods = data.customFoods.some((item) => item.label.toLowerCase() === profile.label.toLowerCase()) ? data.customFoods : [...data.customFoods, profile]; const nextData = { ...data, customFoods: foods }; await saveAppData(nextData); return nextData; }
 export async function addCalendarEntry(entry: CalendarEntry) { const data = await loadAppData(); const nextData = { ...data, calendarEntries: [...data.calendarEntries, entry].sort((first, second) => first.startsAt.localeCompare(second.startsAt)) }; await saveAppData(nextData); return nextData; }

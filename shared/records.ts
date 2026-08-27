@@ -215,6 +215,18 @@ export type MedicationPurpose = "preventive" | "pain-control";
 export type MedicationProfile = { id: string; name: string; dose?: string; unit?: string };
 export type MedicationUse = MedicationProfile & { purpose: MedicationPurpose; takenAt: string };
 
+export type FollowUpStatus = "pending" | "improved" | "not-improved" | "worse" | "closed";
+
+export type PainFollowUp = {
+  id: string;
+  painEntryId: string;
+  scheduledAt: string;
+  medicationName?: string;
+  status: FollowUpStatus;
+  answeredAt?: string;
+  nextMedicationName?: string;
+};
+
 export type PainEntry = {
   id: string;
   occurredAt: string;
@@ -232,6 +244,7 @@ export type PainEntry = {
   foodPeriod?: "today" | "last24h";
   medications?: MedicationUse[];
   weather?: WeatherSnapshot & { locality?: string };
+  followUpNote?: string;
 };
 
 export type CalendarEntry = {
@@ -251,6 +264,7 @@ export type AppData = {
   painEntries: PainEntry[];
   medicationHistory: MedicationProfile[];
   customFoods: FoodProfile[];
+  followUps: PainFollowUp[];
 };
 
 export const EMPTY_APP_DATA: AppData = {
@@ -261,6 +275,7 @@ export const EMPTY_APP_DATA: AppData = {
   painEntries: [],
   medicationHistory: [],
   customFoods: [],
+  followUps: [],
 };
 
 export function localSymptomLabel(id: string) {

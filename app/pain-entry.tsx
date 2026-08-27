@@ -7,9 +7,10 @@ import { BodyDiagram } from "@/components/body-diagram";
 import { EmptyState } from "@/components/empty-state";
 import { PrimaryButton } from "@/components/primary-button";
 import { SectionTitle } from "@/components/section-title";
-import { addCustomFood, addMedicationProfile, addPainEntry, loadAppData } from "@/lib/local-data";
+import { addCustomFood, addFollowUp, addMedicationProfile, addPainEntry, loadAppData } from "@/lib/local-data";
 import { formatDateTime } from "@/lib/format";
 import { getCurrentWeather } from "@/lib/weather";
+import { schedulePainFollowUp } from "@/lib/notifications";
 import { AppData, BODY_SITE_DETAILS, BODY_SITES, BodySiteDetailId, BodySiteId, EMOTIONS, FOOD_TRIGGERS, LOCAL_SYMPTOMS, LocalSymptomId, makeId, MedicationProfile, MedicationUse, PAIN_TYPES, PainEntry, FoodProfile, bodySiteLabel } from "@/shared/records";
 import { ScreenContainer } from "@/components/screen-container";
 
@@ -41,7 +42,7 @@ export default function PainEntryScreen() {
   const [customMedicationTime, setCustomMedicationTime] = useState("");
   const [customFoodName, setCustomFoodName] = useState("");
   const [customFoods, setCustomFoods] = useState<FoodProfile[]>([]);
-  const [data, setData] = useState<AppData>({ version: 2, healthEntries: [], weatherEntries: [], calendarEntries: [], painEntries: [], medicationHistory: [], customFoods: [] });
+  const [data, setData] = useState<AppData>({ version: 2, healthEntries: [], weatherEntries: [], calendarEntries: [], painEntries: [], medicationHistory: [], customFoods: [], followUps: [] });
   const [saving, setSaving] = useState(false);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
@@ -78,7 +79,7 @@ export default function PainEntryScreen() {
     try {
       if (await Location.hasServicesEnabledAsync()) { const permission = await Location.requestForegroundPermissionsAsync(); if (permission.status === "granted") { const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }); const current = await getCurrentWeather(position.coords.latitude, position.coords.longitude); const addresses = await Location.reverseGeocodeAsync({ latitude: position.coords.latitude, longitude: position.coords.longitude }); const address = addresses[0]; weather = { ...current, locality: [address?.city, address?.region].filter(Boolean).join(", ") || undefined }; } }
     } catch { /* O registro continua salvo mesmo sem clima. */ }
-    try { await addPainEntry({ id: makeId("pain"), occurredAt: new Date().toISOString(), primarySite, primaryDetail, intensity, localSymptoms, painTypes, radiationSites: noRadiation ? [] : radiationSites, radiationDetails: noRadiation ? [] : radiationDetails, associatedPainIds, emotion, foods, foodPeriod, medications, weather }); if (!weather) Alert.alert("Ocorrência salva", "A dor foi registrada. Não foi possível associar o clima nesta captura.", [{ text: "OK", onPress: () => router.back() }]); else router.back(); } catch { Alert.alert("Não foi possível salvar", "Tente novamente."); } finally { setSaving(false); setLoadingWeather(false); }
+    try { const painId = makeId("pain"); await addPainEntry({ id: painId, occurredAt: new Date().toISOString(), primarySite, primaryDetail, intensity, localSymptoms, painTypes, radiationSites: noRadiation ? [] : radiationSites, radiationDetails: noRadiation ? [] : radiationDetails, associatedPainIds, emotion, foods, foodPeriod, medications, weather }); const followUpId = makeId("followup"); await addFollowUp({ id: followUpId, painEntryId: painId, scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), medicationName: medications.find((item) => item.purpose === "pain-control")?.name, status: "pending" }); await schedulePainFollowUp(followUpId, medications.find((item) => item.purpose === "pain-control")?.name); Alert.alert("Dor registrada com sucesso!", "Um lembrete será enviado em 2 horas para você acompanhar a evolução.", [{ text: "OK", onPress: () => router.back() }]); } catch { Alert.alert("Não foi possível salvar", "Tente novamente."); } finally { setSaving(false); setLoadingWeather(false); }
   };
 
   return <ScreenContainer className="px-5" edges={["top", "bottom", "left", "right"]} containerClassName="bg-background"><KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}><View style={styles.topline}><Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={previous} style={styles.back}><Text style={styles.backText}>‹</Text></Pressable><Text style={styles.progress}>{step} de 10</Text></View><SectionTitle eyebrow="Registro rápido" title={currentTitle} detail={step === 1 ? "Toque na imagem corporal e depois aproxime o mapa, se necessário." : "Escolha o que se aplica; texto é opcional."} />

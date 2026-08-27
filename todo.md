@@ -58,3 +58,10 @@
 - [x] Criar tela de medicamentos preventivos e para controle da dor, com histórico local reutilizável.
 - [x] Integrar os novos dados às correlações, relatórios médicos e exportação local.
 - [x] Criar testes e validar acessibilidade, funcionamento offline e fluxo com pouca leitura.
+
+- [x] Confirmar o fluxo completo de registro de dor com mensagem de sucesso e captura automática de GPS, clima e data/hora.
+- [x] Agendar notificação local de acompanhamento duas horas após a ocorrência ou medicamento.
+- [x] Implementar o loop pós-medicação com respostas sobre melhora, intensificação, outro medicamento e encerramento.
+- [x] Implementar relatório compartilhável em PDF para avaliação médica.
+- [x] Implementar abertura, edição e salvamento de registros anteriores.
+- [x] Adicionar testes determinísticos para notificações, ramificações, edição e relatório PDF.
