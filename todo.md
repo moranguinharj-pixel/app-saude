@@ -125,3 +125,11 @@
 - [x] Adicionar badge e navegação para notificações e acompanhamentos de dor.
 - [x] Integrar a central ao agendamento de lembretes de 2 horas sem duplicar registros.
 - [x] Validar a central no Android/preview e criar checkpoint.
+
+- [x] Sincronizar o estado da versão 9 com o repositório privado `app-saude`.
+- [x] Validar no GitHub o commit e a branch correspondentes à versão 9.
+
+- [x] Substituir a silhueta estilizada por representação corporal visualmente mais anatômica.
+- [x] Criar quatro vistas coerentes: frente, costas, lateral esquerda e lateral direita.
+- [x] Manter pontos livres, zoom e conversão X/Y alinhados aos novos desenhos.
+- [x] Validar que o APK/preview mostre o novo visual após a atualização.
