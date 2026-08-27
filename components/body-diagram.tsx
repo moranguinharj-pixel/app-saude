@@ -1,36 +1,99 @@
+import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Svg, { Ellipse, G, Path, Rect } from "react-native-svg";
 
-import { BODY_SITES, BodySiteId } from "@/shared/records";
+import { BodySiteDetailId, BodySiteId } from "@/shared/records";
 
-const MARKERS: Record<BodySiteId, { left: number; top: number }> = {
-  head: { left: 102, top: 8 },
-  face: { left: 102, top: 49 },
-  neck: { left: 102, top: 82 },
-  "left-shoulder": { left: 60, top: 96 },
-  "right-shoulder": { left: 144, top: 96 },
-  "left-arm": { left: 25, top: 136 },
-  "right-arm": { left: 179, top: 136 },
-  chest: { left: 102, top: 117 },
-  abdomen: { left: 102, top: 165 },
-  "upper-back": { left: 102, top: 117 },
-  "lower-back": { left: 102, top: 165 },
-  "left-hip": { left: 76, top: 207 },
-  "right-hip": { left: 128, top: 207 },
-  "left-thigh": { left: 76, top: 244 },
-  "right-thigh": { left: 128, top: 244 },
-  "left-knee": { left: 76, top: 294 },
-  "right-knee": { left: 128, top: 294 },
-  "left-leg": { left: 76, top: 328 },
-  "right-leg": { left: 128, top: 328 },
-  "left-foot": { left: 67, top: 376 },
-  "right-foot": { left: 137, top: 376 },
-};
+type Point = { id: BodySiteDetailId; coarse: BodySiteId; x: number; y: number };
 
-export function BodyDiagram({ selected = [], onSelect, multi = false, side, onSideChange }: { selected?: BodySiteId[]; onSelect: (site: BodySiteId) => void; multi?: boolean; side: "front" | "back"; onSideChange: (side: "front" | "back") => void }) {
-  const visibleSites = side === "front" ? BODY_SITES.filter((site) => !["upper-back", "lower-back"].includes(site.id)) : BODY_SITES.filter((site) => ["head", "neck", "left-shoulder", "right-shoulder", "left-arm", "right-arm", "upper-back", "abdomen", "lower-back", "left-hip", "right-hip", "left-thigh", "right-thigh", "left-knee", "right-knee", "left-leg", "right-leg", "left-foot", "right-foot"].includes(site.id));
-  return <View style={styles.root}><View style={styles.sideToggle}><Pressable accessibilityRole="button" accessibilityState={{ selected: side === "front" }} onPress={() => onSideChange("front")} style={[styles.sideButton, side === "front" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "front" && styles.sideTextActive]}>Frente</Text></Pressable><Pressable accessibilityRole="button" accessibilityState={{ selected: side === "back" }} onPress={() => onSideChange("back")} style={[styles.sideButton, side === "back" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "back" && styles.sideTextActive]}>Costas</Text></Pressable></View><View style={styles.diagram}><BodyShape side={side} />{visibleSites.map((site) => { const position = MARKERS[site.id]; const active = selected.includes(site.id); return <Pressable key={site.id} accessibilityRole="button" accessibilityLabel={`${site.label}${active ? ", selecionado" : ""}`} accessibilityState={{ selected: active }} onPress={() => onSelect(site.id)} style={[styles.marker, { left: position.left, top: position.top }, active && styles.markerActive]}><Text style={[styles.markerText, active && styles.markerTextActive]}>{site.icon}</Text></Pressable>; })}</View><Text style={styles.helper}>{multi ? "Toque em uma ou mais regiões" : "Toque no ponto que representa a dor"}</Text></View>;
+const FRONT_POINTS: Point[] = [
+  { id: "head-top", coarse: "head", x: 0.5, y: 0.08 },
+  { id: "forehead-left", coarse: "head", x: 0.58, y: 0.15 },
+  { id: "forehead-right", coarse: "head", x: 0.42, y: 0.15 },
+  { id: "above-eye-left", coarse: "face", x: 0.58, y: 0.205 },
+  { id: "above-eye-right", coarse: "face", x: 0.42, y: 0.205 },
+  { id: "below-eye-left", coarse: "face", x: 0.58, y: 0.245 },
+  { id: "below-eye-right", coarse: "face", x: 0.42, y: 0.245 },
+  { id: "ear-left-upper", coarse: "face", x: 0.70, y: 0.20 },
+  { id: "ear-left-lower", coarse: "face", x: 0.70, y: 0.27 },
+  { id: "ear-right-upper", coarse: "face", x: 0.30, y: 0.20 },
+  { id: "ear-right-lower", coarse: "face", x: 0.30, y: 0.27 },
+  { id: "temple-left", coarse: "face", x: 0.63, y: 0.22 },
+  { id: "temple-right", coarse: "face", x: 0.37, y: 0.22 },
+  { id: "cheek-left", coarse: "face", x: 0.58, y: 0.27 },
+  { id: "cheek-right", coarse: "face", x: 0.42, y: 0.27 },
+  { id: "jaw-left", coarse: "face", x: 0.56, y: 0.31 },
+  { id: "jaw-right", coarse: "face", x: 0.44, y: 0.31 },
+  { id: "neck-front", coarse: "neck", x: 0.5, y: 0.35 },
+  { id: "chest-left", coarse: "chest", x: 0.59, y: 0.43 },
+  { id: "chest-right", coarse: "chest", x: 0.41, y: 0.43 },
+  { id: "chest-center", coarse: "chest", x: 0.5, y: 0.43 },
+  { id: "rib-left-upper", coarse: "chest", x: 0.65, y: 0.42 },
+  { id: "rib-right-upper", coarse: "chest", x: 0.35, y: 0.42 },
+  { id: "rib-left-lower", coarse: "chest", x: 0.64, y: 0.49 },
+  { id: "rib-right-lower", coarse: "chest", x: 0.36, y: 0.49 },
+  { id: "abdomen-left-upper", coarse: "abdomen", x: 0.57, y: 0.52 },
+  { id: "abdomen-right-upper", coarse: "abdomen", x: 0.43, y: 0.52 },
+  { id: "abdomen-left-lower", coarse: "abdomen", x: 0.57, y: 0.59 },
+  { id: "abdomen-right-lower", coarse: "abdomen", x: 0.43, y: 0.59 },
+  { id: "lower-belly-left", coarse: "abdomen", x: 0.56, y: 0.64 },
+  { id: "lower-belly-right", coarse: "abdomen", x: 0.44, y: 0.64 },
+  { id: "flank-left", coarse: "abdomen", x: 0.66, y: 0.55 },
+  { id: "flank-right", coarse: "abdomen", x: 0.34, y: 0.55 },
+  { id: "pelvis-left", coarse: "left-hip", x: 0.58, y: 0.71 },
+  { id: "pelvis-right", coarse: "right-hip", x: 0.42, y: 0.71 },
+  { id: "ovary-left", coarse: "left-hip", x: 0.57, y: 0.75 },
+  { id: "ovary-right", coarse: "right-hip", x: 0.43, y: 0.75 },
+  { id: "groin-left", coarse: "left-hip", x: 0.56, y: 0.80 },
+  { id: "groin-right", coarse: "right-hip", x: 0.44, y: 0.80 },
+  { id: "thigh-left-front", coarse: "left-thigh", x: 0.57, y: 0.88 },
+  { id: "thigh-right-front", coarse: "right-thigh", x: 0.43, y: 0.88 },
+  { id: "knee-left", coarse: "left-knee", x: 0.57, y: 0.985 },
+  { id: "knee-right", coarse: "right-knee", x: 0.43, y: 0.985 },
+];
+
+const BACK_POINTS: Point[] = [
+  { id: "head-top", coarse: "head", x: 0.5, y: 0.08 },
+  { id: "behind-head-left", coarse: "head", x: 0.58, y: 0.19 },
+  { id: "behind-head-right", coarse: "head", x: 0.42, y: 0.19 },
+  { id: "neck-back", coarse: "neck", x: 0.5, y: 0.35 },
+  { id: "upper-back-left", coarse: "upper-back", x: 0.59, y: 0.43 },
+  { id: "upper-back-right", coarse: "upper-back", x: 0.41, y: 0.43 },
+  { id: "lower-back-left", coarse: "lower-back", x: 0.58, y: 0.57 },
+  { id: "lower-back-right", coarse: "lower-back", x: 0.42, y: 0.57 },
+  { id: "hip-left-side", coarse: "left-hip", x: 0.58, y: 0.71 },
+  { id: "hip-right-side", coarse: "right-hip", x: 0.42, y: 0.71 },
+  { id: "thigh-left-back", coarse: "left-thigh", x: 0.57, y: 0.88 },
+  { id: "thigh-right-back", coarse: "right-thigh", x: 0.43, y: 0.88 },
+  { id: "calf-left", coarse: "left-leg", x: 0.57, y: 0.985 },
+  { id: "calf-right", coarse: "right-leg", x: 0.43, y: 0.985 },
+];
+
+export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onSelectDetail, multi = false, side, onSideChange }: { selected?: BodySiteId[]; selectedDetails?: BodySiteDetailId[]; onSelect: (site: BodySiteId) => void; onSelectDetail?: (detail: BodySiteDetailId) => void; multi?: boolean; side: "front" | "back"; onSideChange: (side: "front" | "back") => void }) {
+  const points = side === "front" ? FRONT_POINTS : BACK_POINTS;
+  const selectedPoints = useMemo(() => { const exact = points.filter((point) => selectedDetails.includes(point.id)); if (exact.length) return exact; return points.filter((point, index) => selected.includes(point.coarse) && points.findIndex((candidate) => candidate.coarse === point.coarse) === index); }, [points, selected, selectedDetails]);
+  const handleMapPress = (event: any) => {
+    const { locationX, locationY } = event.nativeEvent;
+    const nearest = resolveBodyPoint(side, locationX / MAP_WIDTH, locationY / MAP_HEIGHT);
+    onSelect(nearest.coarse);
+    onSelectDetail?.(nearest.id);
+  };
+
+  return <View style={styles.root}><View style={styles.sideToggle}><Pressable accessibilityRole="button" accessibilityLabel="Vista frontal" accessibilityState={{ selected: side === "front" }} onPress={() => onSideChange("front")} style={[styles.sideButton, side === "front" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "front" && styles.sideTextActive]}>Frente</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista posterior" accessibilityState={{ selected: side === "back" }} onPress={() => onSideChange("back")} style={[styles.sideButton, side === "back" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "back" && styles.sideTextActive]}>Costas</Text></Pressable></View><View style={styles.mapFrame}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`Mapa corporal ${side === "front" ? "frontal" : "posterior"}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={styles.map}><Svg width={MAP_WIDTH} height={MAP_HEIGHT} viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} pointerEvents="none"><BodyArt side={side} /><Rect x="0" y="0" width={MAP_WIDTH} height={MAP_HEIGHT} fill="transparent" /></Svg>{selectedPoints.map((point) => <View key={point.id} pointerEvents="none" style={[styles.selection, { left: point.x * MAP_WIDTH - 14, top: point.y * MAP_HEIGHT - 14 }]}><Text style={styles.selectionText}>•</Text></View>)}</Pressable></View><Text style={styles.helper}>{multi ? "Toque diretamente no local ou em vários pontos" : "Toque diretamente no local; o app identifica a área"}</Text></View>;
 }
 
-function BodyShape({ side }: { side: "front" | "back" }) { return <View pointerEvents="none" style={styles.shape}><View style={styles.headShape} /><View style={styles.neckShape} /><View style={[styles.torsoShape, side === "back" && styles.backTone]} /><View style={[styles.armShape, styles.leftArm]} /><View style={[styles.armShape, styles.rightArm]} /><View style={[styles.legShape, styles.leftLeg]} /><View style={[styles.legShape, styles.rightLeg]} /><View style={[styles.footShape, styles.leftFoot]} /><View style={[styles.footShape, styles.rightFoot]} /></View>; }
+export function resolveBodyPoint(side: "front" | "back", rawX: number, rawY: number): Point {
+  const points = side === "front" ? FRONT_POINTS : BACK_POINTS;
+  const x = Math.max(0, Math.min(1, rawX));
+  const y = Math.max(0, Math.min(1, rawY));
+  return points.reduce((best, point) => {
+    const distance = (point.x - x) ** 2 + (point.y - y) ** 2;
+    return distance < best.distance ? { point, distance } : best;
+  }, { point: points[0], distance: Number.POSITIVE_INFINITY }).point;
+}
 
-const styles = StyleSheet.create({ root: { alignItems: "center" }, sideToggle: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 8, padding: 4, width: 180 }, sideButton: { alignItems: "center", borderRadius: 10, flex: 1, minHeight: 38, justifyContent: "center" }, sideButtonActive: { backgroundColor: "#176B87" }, sideText: { color: "#60747C", fontSize: 13, fontWeight: "700" }, sideTextActive: { color: "#FFFFFF" }, diagram: { height: 425, position: "relative", width: 250 }, shape: { height: 425, left: 0, position: "absolute", top: 0, width: 250 }, headShape: { backgroundColor: "#DCE9ED", borderRadius: 36, height: 62, left: 94, position: "absolute", top: 4, width: 62 }, neckShape: { backgroundColor: "#DCE9ED", height: 34, left: 103, position: "absolute", top: 61, width: 44 }, torsoShape: { backgroundColor: "#DCE9ED", borderRadius: 46, height: 151, left: 69, position: "absolute", top: 80, width: 112 }, backTone: { backgroundColor: "#CFDFE4" }, armShape: { backgroundColor: "#DCE9ED", borderRadius: 18, height: 135, position: "absolute", top: 86, width: 32 }, leftArm: { left: 42, transform: [{ rotate: "8deg" }] }, rightArm: { right: 42, transform: [{ rotate: "-8deg" }] }, legShape: { backgroundColor: "#DCE9ED", borderRadius: 20, height: 165, position: "absolute", top: 218, width: 39 }, leftLeg: { left: 78 }, rightLeg: { right: 78 }, footShape: { backgroundColor: "#DCE9ED", borderRadius: 14, bottom: 1, height: 23, position: "absolute", width: 57 }, leftFoot: { left: 51 }, rightFoot: { right: 51 }, marker: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#AFC7CE", borderRadius: 24, borderWidth: 2, height: 48, justifyContent: "center", position: "absolute", width: 48, zIndex: 2 }, markerActive: { backgroundColor: "#E98B5A", borderColor: "#B55735", transform: [{ scale: 1.08 }] }, markerText: { color: "#176B87", fontSize: 18, fontWeight: "800" }, markerTextActive: { color: "#FFFFFF" }, helper: { color: "#60747C", fontSize: 13, fontWeight: "600", marginTop: -3, textAlign: "center" } });
+function BodyArt({ side }: { side: "front" | "back" }) { return <G><Ellipse cx="94" cy="48" rx="8" ry="14" fill="#C8DDE2" /><Ellipse cx="156" cy="48" rx="8" ry="14" fill="#C8DDE2" /><Ellipse cx="125" cy="43" rx="31" ry="36" fill="#DCE9ED" /><Path d="M108 73 C108 80 103 84 96 90 L76 112 C69 128 72 174 85 205 L96 226 L154 226 L165 205 C178 174 181 128 174 112 L154 90 C147 84 142 80 142 73 Z" fill={side === "back" ? "#CFDFE4" : "#DCE9ED"} /><Rect x="110" y="74" width="30" height="35" rx="14" fill="#DCE9ED" /><Path d="M80 99 C65 100 51 117 42 145 L28 208 C27 219 34 226 43 226 C51 226 56 220 58 210 L73 161 L89 133 Z" fill="#DCE9ED" /><Path d="M170 99 C185 100 199 117 208 145 L222 208 C223 219 216 226 207 226 C199 226 194 220 192 210 L177 161 L161 133 Z" fill="#DCE9ED" /><Path d="M94 214 L122 214 L120 341 C117 362 105 389 99 418 L75 418 C77 386 83 359 84 337 Z" fill="#DCE9ED" /><Path d="M128 214 L156 214 L166 337 C167 359 173 386 175 418 L151 418 C145 389 133 362 130 341 Z" fill="#DCE9ED" /><Path d="M74 411 L101 411 L94 438 L58 438 C55 429 61 417 74 411 Z" fill="#DCE9ED" /><Path d="M150 411 L177 411 C190 417 195 429 192 438 L156 438 Z" fill="#DCE9ED" /><Path d="M102 117 Q125 134 148 117" stroke="#B9D0D6" strokeWidth="2" fill="none" /><Path d={side === "back" ? "M92 145 Q125 160 158 145 M91 183 Q125 199 159 183" : "M88 145 Q125 157 162 145 M90 179 Q125 190 160 179"} stroke="#B9D0D6" strokeWidth="2" fill="none" /></G>; }
+
+const MAP_WIDTH = 250;
+const MAP_HEIGHT = 455;
+const styles = StyleSheet.create({ root: { alignItems: "center" }, sideToggle: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 8, padding: 4, width: 180 }, sideButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 38 }, sideButtonActive: { backgroundColor: "#176B87" }, sideText: { color: "#60747C", fontSize: 13, fontWeight: "700" }, sideTextActive: { color: "#FFFFFF" }, mapFrame: { backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 24, borderWidth: 1, padding: 12 }, map: { backgroundColor: "#F7FAFC", borderRadius: 16, height: MAP_HEIGHT, overflow: "hidden", position: "relative", width: MAP_WIDTH }, selection: { alignItems: "center", backgroundColor: "#E98B5A", borderColor: "#B55735", borderRadius: 14, borderWidth: 2, height: 28, justifyContent: "center", position: "absolute", width: 28 }, selectionText: { color: "#FFFFFF", fontSize: 20, fontWeight: "900", lineHeight: 20 }, helper: { color: "#60747C", fontSize: 13, fontWeight: "600", marginTop: 8, textAlign: "center" } });

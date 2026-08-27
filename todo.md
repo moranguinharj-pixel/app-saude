@@ -39,3 +39,9 @@
 - [x] Criar associações automáticas por local, trajetória, intensidade, clima, humor, alimentos, horário e frequência.
 - [x] Exibir resultados como padrões observados com contagens e médias, sem afirmar causalidade ou diagnóstico.
 - [x] Atualizar o relatório médico e os testes para a análise sem causa informada.
+
+- [x] Substituir a silhueta de pequenos marcadores por uma imagem corporal 2D ampla e clicável.
+- [x] Capturar coordenadas X/Y normalizadas do toque e convertê-las em regiões anatômicas detalhadas.
+- [x] Permitir frente e costas com confirmação visual mínima e sem exigir leitura dos nomes.
+- [x] Aumentar a confiabilidade com zonas anatômicas, alvo ampliado e feedback visual após o toque.
+- [x] Testar toques em cabeça, orelhas, olhos, pelve e membros no Android.
