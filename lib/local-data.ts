@@ -27,6 +27,7 @@ export async function loadAppData(): Promise<AppData> {
       medicationHistory: Array.isArray(parsed.medicationHistory) ? parsed.medicationHistory : [],
       customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
       followUps: Array.isArray(parsed.followUps) ? parsed.followUps : [],
+      deletedPainEntries: Array.isArray(parsed.deletedPainEntries) ? parsed.deletedPainEntries : [],
     };
   } catch {
     return EMPTY_APP_DATA;
@@ -52,6 +53,7 @@ export async function deleteEntry(kind: "health" | "weather" | "calendar" | "pai
     weatherEntries: kind === "weather" ? data.weatherEntries.filter((entry) => entry.id !== id) : data.weatherEntries,
     calendarEntries: kind === "calendar" ? data.calendarEntries.filter((entry) => entry.id !== id) : data.calendarEntries,
     painEntries: kind === "pain" ? data.painEntries.filter((entry) => entry.id !== id) : data.painEntries,
+    deletedPainEntries: kind === "pain" ? [...data.deletedPainEntries, ...data.painEntries.filter((entry) => entry.id === id)] : data.deletedPainEntries,
   };
   await saveAppData(nextData);
   return nextData;

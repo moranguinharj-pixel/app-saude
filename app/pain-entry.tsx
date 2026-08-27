@@ -42,7 +42,7 @@ export default function PainEntryScreen() {
   const [customMedicationTime, setCustomMedicationTime] = useState("");
   const [customFoodName, setCustomFoodName] = useState("");
   const [customFoods, setCustomFoods] = useState<FoodProfile[]>([]);
-  const [data, setData] = useState<AppData>({ version: 2, healthEntries: [], weatherEntries: [], calendarEntries: [], painEntries: [], medicationHistory: [], customFoods: [], followUps: [] });
+  const [data, setData] = useState<AppData>({ version: 2, healthEntries: [], weatherEntries: [], calendarEntries: [], painEntries: [], medicationHistory: [], customFoods: [], followUps: [], deletedPainEntries: [] });
   const [saving, setSaving] = useState(false);
   const [loadingWeather, setLoadingWeather] = useState(false);
 

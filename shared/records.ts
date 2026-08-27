@@ -265,6 +265,7 @@ export type AppData = {
   medicationHistory: MedicationProfile[];
   customFoods: FoodProfile[];
   followUps: PainFollowUp[];
+  deletedPainEntries: PainEntry[];
 };
 
 export const EMPTY_APP_DATA: AppData = {
@@ -276,6 +277,7 @@ export const EMPTY_APP_DATA: AppData = {
   medicationHistory: [],
   customFoods: [],
   followUps: [],
+  deletedPainEntries: [],
 };
 
 export function localSymptomLabel(id: string) {

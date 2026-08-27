@@ -65,3 +65,12 @@
 - [x] Implementar relatório compartilhável em PDF para avaliação médica.
 - [x] Implementar abertura, edição e salvamento de registros anteriores.
 - [x] Adicionar testes determinísticos para notificações, ramificações, edição e relatório PDF.
+
+- [x] Expandir Histórico com lista recente, pontos coloridos, intensidade, emoções e alimentos.
+- [x] Adicionar ações Editar e Apagar por gesto/ação acessível, movendo apagados para lixeira reversível.
+- [x] Adicionar filtros de histórico por data, intensidade e localização anatômica.
+- [x] Expandir Relatórios com gráficos de horário, dia da semana, medicação, alimentos, emoções e clima.
+- [x] Gerar insights somente como associações observadas, com amostra e limitação visíveis.
+- [x] Criar tela Configurações para medicamentos, alimentos, dados, notificações e privacidade.
+- [x] Adicionar exportação CSV/PDF e opção de backup local automático.
+- [x] Avaliar sincronização manual com Google Sheets sem ativá-la sem autorização explícita.
