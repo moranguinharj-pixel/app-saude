@@ -113,3 +113,9 @@
 - [x] Criar conversão anatômica específica para cada vista, sem reutilizar offsets entre desenhos.
 - [x] Integrar o novo atlas ao zoom, irradiação, histórico e edição do local.
 - [x] Validar pontos anatômicos e layout móvel antes de criar a próxima versão.
+
+- [ ] Verificar e conectar o projeto Registro Pessoal a um repositório GitHub autorizado.
+- [ ] Sincronizar o código com o repositório GitHub e validar o envio.
+
+- [ ] Criar o repositório privado `app-saude` no GitHub.
+- [ ] Conectar o projeto Registro Pessoal ao remoto GitHub e enviar o código atual.
