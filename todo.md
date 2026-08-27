@@ -133,3 +133,7 @@
 - [x] Criar quatro vistas coerentes: frente, costas, lateral esquerda e lateral direita.
 - [x] Manter pontos livres, zoom e conversão X/Y alinhados aos novos desenhos.
 - [x] Validar que o APK/preview mostre o novo visual após a atualização.
+
+- [ ] Criar commit da versão 10 com o estado atual do módulo corporal anatômico.
+- [ ] Enviar a versão 10 para a branch `main` do repositório privado `app-saude`.
+- [ ] Validar no GitHub o commit e o histórico preservado da versão 9.
