@@ -1,4 +1,4 @@
-import { bodySiteDetailLabel, chronicConditionLabel, emotionLabel, foodLabel, PainEntry, painTypeLabel } from "@/shared/records";
+import { bodySiteDetailLabel, chronicConditionLabel, emotionLabel, foodLabel, localSymptomLabel, MedicationUse, PainEntry, painTypeLabel } from "@/shared/records";
 
 export function isWithinPeriod(value: string, days: number, now = new Date()) {
   const start = new Date(now);
@@ -22,6 +22,9 @@ export function buildPainReport(entries: PainEntry[], days: number, now = new Da
   const types = rankedCounts(periodEntries.flatMap((entry) => entry.painTypes), painTypeLabel);
   const conditions = rankedCounts(periodEntries.flatMap((entry) => entry.conditions ?? []), chronicConditionLabel);
   const radiation = rankedCounts(periodEntries.flatMap((entry) => entry.radiationDetails?.length ? entry.radiationDetails : entry.radiationSites), bodySiteDetailLabel);
+  const symptoms = rankedCounts(periodEntries.flatMap((entry) => entry.localSymptoms ?? []), localSymptomLabel);
+  const associatedPainCount = periodEntries.filter((entry) => (entry.associatedPainIds ?? []).length > 0).length;
+  const medications = rankedCounts(periodEntries.flatMap((entry) => (entry.medications ?? []).map((medication: MedicationUse) => medication.name)), (value) => value);
   const emotions = rankedCounts(periodEntries.map((entry) => entry.emotion), emotionLabel);
   const foods = rankedCounts(periodEntries.flatMap((entry) => entry.foods).filter((food) => food !== "none"), foodLabel);
   const weatherEntries = periodEntries.filter((entry) => entry.weather);
@@ -34,5 +37,5 @@ export function buildPainReport(entries: PainEntry[], days: number, now = new Da
     const matching = periodEntries.filter((entry) => entry.emotion === emotion.id);
     return { ...emotion, averageIntensity: matching.reduce((sum, entry) => sum + entry.intensity, 0) / matching.length };
   });
-  return { entries: periodEntries, intensityAverage, sites, radiation, types, conditions, emotions, foods: averageIntensityByFood, averageIntensityByEmotion, weatherAverage, weatherCount: weatherEntries.length };
+  return { entries: periodEntries, intensityAverage, sites, radiation, symptoms, associatedPainCount, medications, types, conditions, emotions, foods: averageIntensityByFood, averageIntensityByEmotion, weatherAverage, weatherCount: weatherEntries.length };
 }

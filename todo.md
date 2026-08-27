@@ -49,3 +49,12 @@
 - [x] Adicionar controles acessíveis de aumentar, reduzir e redefinir o zoom no mapa corporal.
 - [x] Permitir navegar pela imagem ampliada sem perder a precisão das coordenadas do toque.
 - [x] Validar zoom e seleção de áreas menores em tela móvel e no Android.
+
+- [x] Manter e validar o zoom do mapa corporal durante o novo fluxo.
+- [x] Adicionar sintomas locais selecionáveis por ícones após a intensidade.
+- [x] Permitir associar uma ocorrência a múltiplas dores registradas anteriormente, sem presumir causa.
+- [x] Criar tela de emoções em grade visual 4×4 com duas posições vazias.
+- [x] Criar tela de alimentação com abas Hoje e Últimas 24h, seleção múltipla e alimento customizado.
+- [x] Criar tela de medicamentos preventivos e para controle da dor, com histórico local reutilizável.
+- [x] Integrar os novos dados às correlações, relatórios médicos e exportação local.
+- [x] Criar testes e validar acessibilidade, funcionamento offline e fluxo com pouca leitura.

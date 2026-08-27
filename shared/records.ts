@@ -146,6 +146,19 @@ export function chronicConditionLabel(id: string) {
   return CHRONIC_CONDITIONS.find((condition) => condition.id === id)?.label ?? id;
 }
 
+export const LOCAL_SYMPTOMS = [
+  { id: "swollen", label: "Inchado", icon: "🔴" },
+  { id: "warm", label: "Quente", icon: "♨️" },
+  { id: "red", label: "Vermelho", icon: "🟥" },
+  { id: "blistered", label: "Com bolhas", icon: "🫧" },
+  { id: "bruised", label: "Manchado", icon: "🟣" },
+  { id: "numb", label: "Dormente", icon: "⭕" },
+  { id: "stiff", label: "Rígido", icon: "🪵" },
+  { id: "weak", label: "Fraco", icon: "〽️" },
+  { id: "limited-movement", label: "Movimento limitado", icon: "🚫" },
+  { id: "touch-sensitive", label: "Sensível ao toque", icon: "✋" },
+] as const;
+
 export const PAIN_TYPES = [
   { id: "throbbing", label: "Pulsante", icon: "〰" },
   { id: "aching", label: "Dolorida", icon: "◉" },
@@ -194,6 +207,14 @@ export const FOOD_TRIGGERS = [
   { id: "none", label: "Nenhum desses", icon: "✓" },
 ] as const;
 
+export type LocalSymptomId = (typeof LOCAL_SYMPTOMS)[number]["id"];
+
+export type FoodProfile = { id: string; label: string };
+
+export type MedicationPurpose = "preventive" | "pain-control";
+export type MedicationProfile = { id: string; name: string; dose?: string; unit?: string };
+export type MedicationUse = MedicationProfile & { purpose: MedicationPurpose; takenAt: string };
+
 export type PainEntry = {
   id: string;
   occurredAt: string;
@@ -203,9 +224,13 @@ export type PainEntry = {
   radiationSites: BodySiteId[];
   radiationDetails?: BodySiteDetailId[];
   intensity: number;
+  localSymptoms?: LocalSymptomId[];
+  associatedPainIds?: string[];
   painTypes: string[];
   emotion: string;
   foods: string[];
+  foodPeriod?: "today" | "last24h";
+  medications?: MedicationUse[];
   weather?: WeatherSnapshot & { locality?: string };
 };
 
@@ -224,6 +249,8 @@ export type AppData = {
   weatherEntries: WeatherEntry[];
   calendarEntries: CalendarEntry[];
   painEntries: PainEntry[];
+  medicationHistory: MedicationProfile[];
+  customFoods: FoodProfile[];
 };
 
 export const EMPTY_APP_DATA: AppData = {
@@ -232,7 +259,13 @@ export const EMPTY_APP_DATA: AppData = {
   weatherEntries: [],
   calendarEntries: [],
   painEntries: [],
+  medicationHistory: [],
+  customFoods: [],
 };
+
+export function localSymptomLabel(id: string) {
+  return LOCAL_SYMPTOMS.find((symptom) => symptom.id === id)?.label ?? id;
+}
 
 export function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

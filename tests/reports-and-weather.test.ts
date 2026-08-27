@@ -17,6 +17,8 @@ const data: AppData = {
     { id: "w-2", capturedAt: "2026-08-24T12:00:00.000Z", latitude: -23.5, longitude: -46.6, temperature: 24, apparentTemperature: 24, humidity: 55, windSpeed: 8, weatherCode: 2, isDay: true },
   ],
   calendarEntries: [{ id: "c-1", title: "Consulta", category: "Saúde", startsAt: "2026-08-25T13:00:00.000Z" }],
+  medicationHistory: [],
+  customFoods: [],
 };
 
 describe("relatórios locais", () => {
