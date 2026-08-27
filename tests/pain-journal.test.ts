@@ -30,3 +30,10 @@ describe("relatório do diário de dor", () => {
     expect(report.entries).toHaveLength(2);
   });
 });
+
+  it("aceita múltiplas emoções e irradiação ausente", () => {
+    const report = buildPainReport([{ ...entries[0], id: "p-3", radiationSites: [], radiationDetails: [], emotions: ["worried", "frustrated"] }], 7, now);
+    expect(report.entries).toHaveLength(1);
+    expect(report.radiation).toHaveLength(0);
+    expect(report.averageIntensityByEmotion.map((row) => row.id)).toEqual(expect.arrayContaining(["worried", "frustrated"]));
+  });

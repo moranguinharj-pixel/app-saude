@@ -381,15 +381,20 @@ export const PAIN_TYPES = [
 ] as const;
 
 export const EMOTIONS = [
-  { id: "calm", label: "Calmo", icon: "🙂" },
-  { id: "well", label: "Bem", icon: "😊" },
-  { id: "worried", label: "Preocupado", icon: "😟" },
-  { id: "irritated", label: "Irritado", icon: "😠" },
   { id: "sad", label: "Triste", icon: "😔" },
-  { id: "anxious", label: "Ansioso", icon: "😰" },
-  { id: "tired", label: "Cansado", icon: "😴" },
-  { id: "frustrated", label: "Frustrado", icon: "😣" },
-  { id: "overwhelmed", label: "Sobrecarregado", icon: "🥴" },
+  { id: "well", label: "Feliz", icon: "😊" },
+  { id: "calm", label: "Calma", icon: "😌" },
+  { id: "worried", label: "Estressada", icon: "😫" },
+  { id: "moody", label: "Mal-humorada", icon: "😒" },
+  { id: "irritated", label: "Irritada", icon: "😠" },
+  { id: "anxious", label: "Ansiosa", icon: "😰" },
+  { id: "angry", label: "Raivosa", icon: "😡" },
+  { id: "discouraged", label: "Desanimada", icon: "😞" },
+  { id: "melancholic", label: "Melancólica", icon: "😔" },
+  { id: "euphoric", label: "Eufórica", icon: "🤩" },
+  { id: "excited", label: "Excitada", icon: "🤗" },
+  { id: "impatient", label: "Impaciente", icon: "😤" },
+  { id: "frustrated", label: "Frustrada", icon: "😣" },
 ] as const;
 
 export const FOOD_TRIGGERS = [
@@ -441,6 +446,7 @@ export type PainEntry = {
   associatedPainIds?: string[];
   painTypes: string[];
   emotion: string;
+  emotions?: string[];
   foods: string[];
   foodPeriod?: "today" | "last24h";
   medications?: MedicationUse[];
@@ -502,7 +508,8 @@ export function painTypeLabel(id: string) {
 }
 
 export function emotionLabel(id: string) {
-  return EMOTIONS.find((emotion) => emotion.id === id)?.label ?? id;
+  const legacyLabels: Record<string, string> = { tired: "Cansada", overwhelmed: "Sobrecarregada" };
+  return EMOTIONS.find((emotion) => emotion.id === id)?.label ?? legacyLabels[id] ?? id;
 }
 
 export function foodLabel(id: string) {

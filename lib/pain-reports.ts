@@ -25,7 +25,7 @@ export function buildPainReport(entries: PainEntry[], days: number, now = new Da
   const symptoms = rankedCounts(periodEntries.flatMap((entry) => entry.localSymptoms ?? []), localSymptomLabel);
   const associatedPainCount = periodEntries.filter((entry) => (entry.associatedPainIds ?? []).length > 0).length;
   const medications = rankedCounts(periodEntries.flatMap((entry) => (entry.medications ?? []).map((medication: MedicationUse) => medication.name)), (value) => value);
-  const emotions = rankedCounts(periodEntries.map((entry) => entry.emotion), emotionLabel);
+  const emotions = rankedCounts(periodEntries.flatMap((entry) => entry.emotions?.length ? entry.emotions : [entry.emotion]), emotionLabel);
   const foods = rankedCounts(periodEntries.flatMap((entry) => entry.foods).filter((food) => food !== "none"), foodLabel);
   const weatherEntries = periodEntries.filter((entry) => entry.weather);
   const weatherAverage = weatherEntries.length ? weatherEntries.reduce((sum, entry) => sum + (entry.weather?.temperature ?? 0), 0) / weatherEntries.length : null;
@@ -34,7 +34,7 @@ export function buildPainReport(entries: PainEntry[], days: number, now = new Da
     return { ...food, averageIntensity: matching.reduce((sum, entry) => sum + entry.intensity, 0) / matching.length };
   });
   const averageIntensityByEmotion = emotions.map((emotion) => {
-    const matching = periodEntries.filter((entry) => entry.emotion === emotion.id);
+    const matching = periodEntries.filter((entry) => (entry.emotions?.length ? entry.emotions : [entry.emotion]).includes(emotion.id));
     return { ...emotion, averageIntensity: matching.reduce((sum, entry) => sum + entry.intensity, 0) / matching.length };
   });
   return { entries: periodEntries, intensityAverage, sites, radiation, symptoms, associatedPainCount, medications, types, conditions, emotions, foods: averageIntensityByFood, averageIntensityByEmotion, weatherAverage, weatherCount: weatherEntries.length };

@@ -91,3 +91,12 @@
 - [x] Expandir pontos de articulações, músculos e órgãos com coordenadas específicas.
 - [x] Preservar zoom, coordenadas, histórico e relatórios com o ponto mais específico selecionado.
 - [x] Validar toque fino em todas as sub-regiões no preview móvel e por testes de coordenadas; falta apenas confirmação em um dispositivo Android físico.
+
+- [x] Corrigir deslocamento dos pontos do mapa e eliminar associação incorreta entre ovário, axila e outras regiões.
+- [x] Recalibrar submapas usando anatomia visual efetiva, com coordenadas relativas ao desenho renderizado e não ao contêiner.
+- [x] Tornar a irradiação realmente opcional, permitindo avançar sem selecionar pontos irradiados.
+- [x] Permitir editar o local primário da dor ao abrir um registro existente.
+- [x] Corrigir relatórios para renderizar cards, resumos, gráficos e estados vazios de forma visível.
+- [x] Ajustar tela de emoções para grade 4×4, seleção múltipla e botão Próximo.
+- [x] Revisar tela de medicamentos preventivos e de controle, com dose, horário, adicionar/remover e histórico local.
+- [x] Validar histórico, edição do local, irradiação opcional e relatórios em fluxo completo.
