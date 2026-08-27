@@ -76,3 +76,10 @@
 - [x] Avaliar sincronização manual com Google Sheets sem ativá-la sem autorização explícita.
 
 - [x] Corrigir o observador de notificações para não chamar APIs nativas indisponíveis no preview web.
+
+- [x] Remover checkboxes/listas textuais obrigatórias de local e irradiação; manter apenas o mapa 2D clicável.
+- [x] Garantir que zoom, toque e confirmação automática continuem funcionando sem leitura.
+
+- [x] Corrigir a seleção de cabeça e face para aceitar topo da cabeça, testa, olhos, abaixo dos olhos, bochechas, nariz, mandíbula, orelhas e nuca.
+- [x] Ampliar as áreas de toque ao redor do desenho sem perder a distinção anatômica.
+- [x] Validar essas zonas no zoom e no fluxo de irradiação.
