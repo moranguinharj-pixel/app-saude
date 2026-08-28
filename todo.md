@@ -150,3 +150,10 @@
 
 - [x] Enviar ao GitHub as novas imagens anatômicas e a integração do mapa corporal posteriores à versão 10.
 - [x] Criar e validar um novo commit sem sobrescrever a versão 10.
+
+- [x] Investigar a falha de compilação relatada na Versão 10; o código foi confirmado válido e a Versão 11 permanece como referência estável.
+- [x] Validar novamente TypeScript, testes e exportação Android; a Versão 10 exportou o bundle Android com sucesso em ambiente isolado.
+
+- [x] Corrigir o enquadramento do corpo inteiro para caber na área visível do mapa em Android.
+- [x] Recalibrar a conversão X/Y da vista corporal para impedir que toques no rosto abram submapas de mãos ou regiões incorretas.
+- [x] Validar rosto, mãos, pés, tronco, pelve e quatro vistas com testes de coordenadas e preview móvel.
