@@ -162,3 +162,11 @@
 - [x] Implementar zoom contínuo por pinça com a imagem corporal e os pontos X/Y na mesma tela.
 - [x] Criar malha anatômica mínima tipo batalha naval, alinhada a cada vista, para converter o toque em região sem exigir muitos cliques.
 - [x] Validar que rosto, mãos, pés, órgãos, tronco e pelve sejam identificados no mesmo mapa ampliado.
+
+- [x] Diagnosticar o travamento da compilação/publicação da Versão 12; o bloqueio foi confirmado no processo do painel.
+- [x] Confirmar se a Versão 12 gera bundle Android localmente sem perder a Versão 11; TypeScript, testes e exportação Android passaram.
+- [ ] Preparar uma nova tentativa segura de publicação após identificar a causa.
+
+- [x] Corrigir o toque no ombro que está sendo identificado como joelho direito.
+- [x] Corrigir o toque no rosto que está sendo identificado como flanco esquerdo.
+- [x] Validar a conversão por vista, escala, deslocamento e lateralidade no Android.

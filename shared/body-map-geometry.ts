@@ -18,3 +18,8 @@ export function assetYFromCanonical(side: AnatomicalSide, canonicalY: number): n
   const bounds = ASSET_BODY_BOUNDS[side];
   return bounds.top + Math.max(0, Math.min(1, canonicalY)) * (bounds.bottom - bounds.top);
 }
+
+export function lateralPointX(side: "left" | "right", x: number): number {
+  const offset = side === "left" ? 0.31 : -0.31;
+  return Math.max(0.04, Math.min(0.96, x + offset));
+}

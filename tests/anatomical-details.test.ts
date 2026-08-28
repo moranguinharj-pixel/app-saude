@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assetYFromCanonical, canonicalBodyY } from "@/shared/body-map-geometry";
+import { assetYFromCanonical, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
 import { buildPainReport } from "@/lib/pain-reports";
 import { BODY_SITE_DETAILS, PainEntry, bodySiteDetailLabel } from "@/shared/records";
 
@@ -34,6 +34,13 @@ describe("detalhamento anatômico da dor", () => {
     expect(faceY).toBeLessThan(0.05);
     expect(lowerBodyY).toBeGreaterThan(0.8);
     expect(assetYFromCanonical("front", faceY)).toBeCloseTo(0.15, 5);
+  });
+
+  it("alinha as vistas laterais ao corpo desenhado", () => {
+    expect(lateralPointX("left", 0.44)).toBeCloseTo(0.75, 5);
+    expect(lateralPointX("left", 0.29)).toBeCloseTo(0.6, 5);
+    expect(lateralPointX("right", 0.56)).toBeCloseTo(0.25, 5);
+    expect(canonicalBodyY("front", 0.15)).toBeLessThan(0.05);
   });
 
   it("mantém estruturas finas de mãos, pés, mamas, músculos e órgãos", () => {

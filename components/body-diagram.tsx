@@ -4,7 +4,7 @@ import { PinchGestureHandler, State } from "react-native-gesture-handler";
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
 
 import { BodySiteDetailId, BodySiteId, bodySiteDetailLabel } from "@/shared/records";
-import { assetYFromCanonical, canonicalBodyY } from "@/shared/body-map-geometry";
+import { assetYFromCanonical, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
 import anatomicalFront from "../assets/images/anatomical-front.png";
 import anatomicalBack from "../assets/images/anatomical-back.png";
 import anatomicalLeftProfile from "../assets/images/anatomical-left-profile.png";
@@ -35,6 +35,14 @@ const FRONT_POINTS: Point[] = [
   { id: "neck-front", coarse: "neck", x: 0.5, y: 0.225 },
   { id: "hand-right-overview", coarse: "right-hand", x: 0.16, y: 0.3 },
   { id: "hand-left-overview", coarse: "left-hand", x: 0.84, y: 0.3 },
+  { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.29, y: 0.285 },
+  { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.71, y: 0.285 },
+  { id: "right-deltoid", coarse: "right-shoulder", x: 0.27, y: 0.335 },
+  { id: "left-deltoid", coarse: "left-shoulder", x: 0.73, y: 0.335 },
+  { id: "right-elbow-joint", coarse: "right-arm", x: 0.23, y: 0.445 },
+  { id: "left-elbow-joint", coarse: "left-arm", x: 0.77, y: 0.445 },
+  { id: "right-forearm-flexor", coarse: "right-arm", x: 0.205, y: 0.54 },
+  { id: "left-forearm-flexor", coarse: "left-arm", x: 0.795, y: 0.54 },
   { id: "chest-left", coarse: "chest", x: 0.59, y: 0.29 },
   { id: "chest-right", coarse: "chest", x: 0.41, y: 0.29 },
   { id: "chest-center", coarse: "chest", x: 0.5, y: 0.31 },
@@ -266,7 +274,14 @@ function mapKindForSite(site: BodySiteId): MapKind | undefined {
 }
 
 function rootPointsForSide(side: Side): Point[] {
-  return side === "front" ? FRONT_POINTS : side === "back" ? BACK_POINTS : LATERAL_POINTS[side];
+  if (side === "front") return FRONT_POINTS;
+  if (side === "back") return BACK_POINTS;
+  // As ilustrações laterais ocupam a metade externa da tela; os pontos
+  // precisam acompanhar essa composição, não o centro geométrico do canvas.
+  return LATERAL_POINTS[side].map((point) => ({
+    ...point,
+    x: lateralPointX(side, point.x),
+  }));
 }
 
 function pointsForMap(kind: MapKind, site: BodySiteId): Point[] {
@@ -341,8 +356,8 @@ export function resolveBodyPoint(side: Side, rawX: number, rawY: number): Point 
   const x = Math.max(0, Math.min(1, rawX));
   const y = canonicalBodyY(side, rawY);
   const band = y < 0.22 ? points.filter((point) => point.coarse === "head" || point.coarse === "face" || point.coarse === "neck")
-    : y < 0.32 ? points.filter((point) => ["neck", "chest", "left-arm", "right-arm", "left-hand", "right-hand", "upper-back"].includes(point.coarse))
-    : y < 0.47 ? points.filter((point) => ["chest", "abdomen", "lower-back", "upper-back"].includes(point.coarse))
+    : y < 0.32 ? points.filter((point) => ["neck", "chest", "left-shoulder", "right-shoulder", "left-arm", "right-arm", "left-hand", "right-hand", "upper-back"].includes(point.coarse))
+    : y < 0.47 ? points.filter((point) => ["chest", "left-shoulder", "right-shoulder", "left-arm", "right-arm", "abdomen", "lower-back", "upper-back"].includes(point.coarse))
     : y < 0.58 ? points.filter((point) => ["left-hip", "right-hip", "abdomen", "lower-back"].includes(point.coarse))
     : points.filter((point) => ["left-thigh", "right-thigh", "left-knee", "right-knee", "left-leg", "right-leg", "left-foot", "right-foot"].includes(point.coarse));
   return resolveDetailPoint(band.length ? band : points, x, y);
