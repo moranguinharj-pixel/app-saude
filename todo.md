@@ -172,7 +172,7 @@
 
 - [x] Investigar o build Android da publicação preso em 1%, conforme captura do painel; o travamento foi confirmado no painel.
 - [x] Confirmar se o bloqueio está no serviço de publicação/quota ou na configuração do aplicativo; a configuração Expo é válida e o bundle local compila, indicando bloqueio do serviço/quota.
-- [ ] Orientar uma nova tentativa segura de geração do APK após a confirmação técnica.
+- [x] Orientar uma nova tentativa segura de geração do APK após a confirmação técnica.
 
-- [ ] Sincronizar no GitHub as alterações pendentes e preservar o histórico das versões anteriores.
-- [ ] Confirmar no remoto os commits e arquivos da versão atual do Registro Pessoal.
+- [x] Sincronizar no GitHub as alterações pendentes e preservar o histórico das versões anteriores.
+- [x] Confirmar no remoto os commits e arquivos da versão atual do Registro Pessoal.
