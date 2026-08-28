@@ -157,3 +157,8 @@
 - [x] Corrigir o enquadramento do corpo inteiro para caber na área visível do mapa em Android.
 - [x] Recalibrar a conversão X/Y da vista corporal para impedir que toques no rosto abram submapas de mãos ou regiões incorretas.
 - [x] Validar rosto, mãos, pés, tronco, pelve e quatro vistas com testes de coordenadas e preview móvel.
+
+- [x] Manter o corpo inteiro na mesma tela durante a seleção, sem abrir submapas ao tocar.
+- [x] Implementar zoom contínuo por pinça com a imagem corporal e os pontos X/Y na mesma tela.
+- [x] Criar malha anatômica mínima tipo batalha naval, alinhada a cada vista, para converter o toque em região sem exigir muitos cliques.
+- [x] Validar que rosto, mãos, pés, órgãos, tronco e pelve sejam identificados no mesmo mapa ampliado.
