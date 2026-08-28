@@ -170,3 +170,24 @@
 - [x] Corrigir o toque no ombro que está sendo identificado como joelho direito.
 - [x] Corrigir o toque no rosto que está sendo identificado como flanco esquerdo.
 - [x] Validar a conversão por vista, escala, deslocamento e lateralidade no Android.
+
+- [x] Investigar a falha persistente ao subir a Versão 12 no painel de publicação.
+- [x] Verificar e recuperar o servidor/serviço de desenvolvimento após o último checkpoint.
+- [ ] Confirmar uma tentativa segura de upload sem alterar a Versão 11 preservada.
+
+- [x] Fazer verificação final da falha persistente da publicação da Versão 12 sem criar versões duplicadas.
+- [x] Documentar o bloqueio remoto caso código, servidor e bundle local permaneçam válidos.
+
+- [x] Manter ou restaurar a Versão 12 solicitada, sem reverter para `62bc6977`; o projeto já está no checkpoint `656e1db5`.
+- [x] Confirmar o checkpoint e o estado ativo correspondentes à Versão 12: `656e1db5`.
+
+- [x] Diagnosticar o travamento da publicação Android da Versão 13; não há commit de código separado e o bloqueio está no painel.
+- [x] Confirmar se a Versão 13 compila localmente e preservar a Versão 12 como recuperação; o estado `656e1db5` passou na validação.
+- [ ] Orientar a nova tentativa segura de publicação da Versão 13.
+
+- [ ] Investigar a falha persistente de publicação sem depender de upload do usuário.
+- [ ] Confirmar o estado local compilável e preservar o checkpoint estável.
+- [ ] Orientar o encaminhamento da falha do painel usando apenas texto copiado do erro, se necessário.
+
+- [x] Corrigir o enquadramento para mostrar cabeça, braços, mãos, pernas e pés simultaneamente.
+- [x] Validar o corpo inteiro em todas as quatro vistas sem perder o toque direto e o zoom.
