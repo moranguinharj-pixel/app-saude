@@ -4,7 +4,7 @@ import { PinchGestureHandler, State } from "react-native-gesture-handler";
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
 
 import { BodySiteDetailId, BodySiteId, bodySiteDetailLabel } from "@/shared/records";
-import { assetYFromCanonical, canonicalBodyY } from "@/shared/body-map-geometry";
+import { bodyPointToMap, containedAssetRect, mapPointToBody } from "@/shared/body-map-geometry";
 import anatomicalFront from "../assets/images/anatomical-front.png";
 import anatomicalBack from "../assets/images/anatomical-back.png";
 import anatomicalLeftProfile from "../assets/images/anatomical-left-profile.png";
@@ -32,17 +32,17 @@ const FRONT_POINTS: Point[] = [
   { id: "cheek-right", coarse: "face", x: 0.42, y: 0.155 },
   { id: "jaw-left", coarse: "face", x: 0.56, y: 0.18 },
   { id: "jaw-right", coarse: "face", x: 0.44, y: 0.18 },
-  { id: "neck-front", coarse: "neck", x: 0.5, y: 0.225 },
-  { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.34, y: 0.29 },
-  { id: "right-elbow-inner", coarse: "right-arm", x: 0.29, y: 0.43 },
-  { id: "right-elbow-joint", coarse: "right-arm", x: 0.25, y: 0.44 },
-  { id: "right-elbow-outer", coarse: "right-arm", x: 0.22, y: 0.45 },
-  { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.66, y: 0.29 },
-  { id: "left-elbow-inner", coarse: "left-arm", x: 0.71, y: 0.43 },
-  { id: "left-elbow-joint", coarse: "left-arm", x: 0.75, y: 0.44 },
-  { id: "left-elbow-outer", coarse: "left-arm", x: 0.78, y: 0.45 },
-  { id: "hand-right-overview", coarse: "right-hand", x: 0.16, y: 0.3 },
-  { id: "hand-left-overview", coarse: "left-hand", x: 0.84, y: 0.3 },
+  { id: "neck-front", coarse: "neck", x: 0.5, y: 0.17 },
+  { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.22, y: 0.2 },
+  { id: "right-elbow-inner", coarse: "right-arm", x: 0.2, y: 0.41 },
+  { id: "right-elbow-joint", coarse: "right-arm", x: 0.15, y: 0.43 },
+  { id: "right-elbow-outer", coarse: "right-arm", x: 0.11, y: 0.44 },
+  { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.78, y: 0.2 },
+  { id: "left-elbow-inner", coarse: "left-arm", x: 0.8, y: 0.41 },
+  { id: "left-elbow-joint", coarse: "left-arm", x: 0.85, y: 0.43 },
+  { id: "left-elbow-outer", coarse: "left-arm", x: 0.89, y: 0.44 },
+  { id: "hand-right-overview", coarse: "right-hand", x: 0.07, y: 0.5 },
+  { id: "hand-left-overview", coarse: "left-hand", x: 0.93, y: 0.5 },
   { id: "chest-left", coarse: "chest", x: 0.59, y: 0.29 },
   { id: "chest-right", coarse: "chest", x: 0.41, y: 0.29 },
   { id: "chest-center", coarse: "chest", x: 0.5, y: 0.31 },
@@ -75,13 +75,13 @@ const FRONT_POINTS: Point[] = [
 const LATERAL_POINTS: Record<"left" | "right", Point[]> = {
   left: [
     { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "temple-left", coarse: "face", x: 0.52, y: 0.115 }, { id: "cheek-left", coarse: "face", x: 0.55, y: 0.16 }, { id: "jaw-left", coarse: "face", x: 0.52, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.46, y: 0.225 },
-    { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.44, y: 0.27 }, { id: "left-forearm-flexor", coarse: "left-arm", x: 0.34, y: 0.36 }, { id: "left-elbow-joint", coarse: "left-arm", x: 0.29, y: 0.46 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.25, y: 0.55 }, { id: "left-hand-back", coarse: "left-hand", x: 0.2, y: 0.63 },
+    { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.44, y: 0.2 }, { id: "left-forearm-flexor", coarse: "left-arm", x: 0.34, y: 0.36 }, { id: "left-elbow-joint", coarse: "left-arm", x: 0.29, y: 0.46 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.25, y: 0.55 }, { id: "left-hand-back", coarse: "left-hand", x: 0.2, y: 0.63 },
     { id: "chest-left", coarse: "chest", x: 0.43, y: 0.32 }, { id: "rib-left-upper", coarse: "chest", x: 0.44, y: 0.39 }, { id: "abdomen-left-upper", coarse: "abdomen", x: 0.47, y: 0.47 }, { id: "flank-left", coarse: "abdomen", x: 0.39, y: 0.46 }, { id: "hip-left-side", coarse: "left-hip", x: 0.43, y: 0.54 }, { id: "groin-left", coarse: "left-hip", x: 0.47, y: 0.59 },
     { id: "thigh-left-front", coarse: "left-thigh", x: 0.45, y: 0.68 }, { id: "knee-left", coarse: "left-knee", x: 0.46, y: 0.77 }, { id: "left-calf-muscle", coarse: "left-leg", x: 0.44, y: 0.86 }, { id: "left-ankle-inner", coarse: "left-foot", x: 0.43, y: 0.94 }, { id: "foot-left", coarse: "left-foot", x: 0.55, y: 0.95 },
   ],
   right: [
     { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "temple-right", coarse: "face", x: 0.48, y: 0.115 }, { id: "cheek-right", coarse: "face", x: 0.45, y: 0.16 }, { id: "jaw-right", coarse: "face", x: 0.48, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.54, y: 0.225 },
-    { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.56, y: 0.27 }, { id: "right-forearm-flexor", coarse: "right-arm", x: 0.66, y: 0.36 }, { id: "right-elbow-joint", coarse: "right-arm", x: 0.71, y: 0.46 }, { id: "right-forearm-extensor", coarse: "right-arm", x: 0.75, y: 0.55 }, { id: "right-hand-back", coarse: "right-hand", x: 0.8, y: 0.63 },
+    { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.56, y: 0.2 }, { id: "right-forearm-flexor", coarse: "right-arm", x: 0.66, y: 0.36 }, { id: "right-elbow-joint", coarse: "right-arm", x: 0.71, y: 0.46 }, { id: "right-forearm-extensor", coarse: "right-arm", x: 0.75, y: 0.55 }, { id: "right-hand-back", coarse: "right-hand", x: 0.8, y: 0.63 },
     { id: "chest-right", coarse: "chest", x: 0.57, y: 0.32 }, { id: "rib-right-upper", coarse: "chest", x: 0.56, y: 0.39 }, { id: "abdomen-right-upper", coarse: "abdomen", x: 0.53, y: 0.47 }, { id: "flank-right", coarse: "abdomen", x: 0.61, y: 0.46 }, { id: "hip-right-side", coarse: "right-hip", x: 0.57, y: 0.54 }, { id: "groin-right", coarse: "right-hip", x: 0.53, y: 0.59 },
     { id: "thigh-right-front", coarse: "right-thigh", x: 0.55, y: 0.68 }, { id: "knee-right", coarse: "right-knee", x: 0.54, y: 0.77 }, { id: "right-calf-muscle", coarse: "right-leg", x: 0.56, y: 0.86 }, { id: "right-ankle-outer", coarse: "right-foot", x: 0.57, y: 0.94 }, { id: "foot-right", coarse: "right-foot", x: 0.45, y: 0.95 },
   ],
@@ -91,9 +91,13 @@ const BACK_POINTS: Point[] = [
   { id: "head-top", coarse: "head", x: 0.5, y: 0.018 },
   { id: "behind-head-left", coarse: "head", x: 0.59, y: 0.07 },
   { id: "behind-head-right", coarse: "head", x: 0.41, y: 0.07 },
-  { id: "neck-back", coarse: "neck", x: 0.5, y: 0.225 },
-  { id: "hand-right-overview", coarse: "right-hand", x: 0.16, y: 0.3 },
-  { id: "hand-left-overview", coarse: "left-hand", x: 0.84, y: 0.3 },
+  { id: "neck-back", coarse: "neck", x: 0.5, y: 0.17 },
+  { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.22, y: 0.2 },
+  { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.78, y: 0.2 },
+  { id: "right-elbow-outer", coarse: "right-arm", x: 0.11, y: 0.43 },
+  { id: "left-elbow-outer", coarse: "left-arm", x: 0.89, y: 0.43 },
+  { id: "hand-right-overview", coarse: "right-hand", x: 0.07, y: 0.5 },
+  { id: "hand-left-overview", coarse: "left-hand", x: 0.93, y: 0.5 },
   { id: "upper-back-left", coarse: "upper-back", x: 0.59, y: 0.29 },
   { id: "upper-back-right", coarse: "upper-back", x: 0.41, y: 0.29 },
   { id: "lower-back-left", coarse: "lower-back", x: 0.58, y: 0.42 },
@@ -296,6 +300,9 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
   const mapHeight = activeMap ? 430 : MAP_HEIGHT;
   const renderedWidth = mapWidth * zoom;
   const renderedHeight = mapHeight * zoom;
+  const pointOnMap = (point: Point) => activeMap
+    ? { x: point.x, y: point.y }
+    : bodyPointToMap(side, point.x, point.y, mapWidth / mapHeight);
   const selectedPoints = useMemo(() => {
     const exact = points.filter((point) => selectedDetails.includes(point.id));
     if (exact.length) return exact;
@@ -331,7 +338,7 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
 
   return <View style={styles.root}>
     <View style={styles.sideToggle}><Pressable accessibilityRole="button" accessibilityLabel="Vista frontal" accessibilityState={{ selected: side === "front" }} onPress={() => onSideChange("front")} style={[styles.sideButton, side === "front" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "front" && styles.sideTextActive]}>Frente</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista posterior" accessibilityState={{ selected: side === "back" }} onPress={() => onSideChange("back")} style={[styles.sideButton, side === "back" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "back" && styles.sideTextActive]}>Costas</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral esquerda" accessibilityState={{ selected: side === "left" }} onPress={() => onSideChange("left")} style={[styles.sideButton, side === "left" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "left" && styles.sideTextActive]}>Lateral E</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral direita" accessibilityState={{ selected: side === "right" }} onPress={() => onSideChange("right")} style={[styles.sideButton, side === "right" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "right" && styles.sideTextActive]}>Lateral D</Text></Pressable></View>
-    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>Pinça · {zoom.toFixed(1)}×</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><PinchGestureHandler onGestureEvent={handlePinch} onHandlerStateChange={handlePinchStateChange}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: renderedWidth, height: renderedHeight }]}>{!activeMap && <AnatomicalAsset side={side} width={renderedWidth} height={renderedHeight} />}<Svg width={renderedWidth} height={renderedHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none">{zoom > 1.15 && <GridOverlay width={mapWidth} height={mapHeight} />}{activeMap ? <DetailArt kind={activeMap.kind} site={activeMap.site} /> : null}<Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{zoom > 1.15 && points.map((point) => <Circle key={`target-${point.id}`} cx={point.x * mapWidth} cy={point.y * mapHeight} r={selectedDetails.includes(point.id) ? 9 : 5} fill={selectedDetails.includes(point.id) ? "#E98B5A" : "#176B87"} opacity={selectedDetails.includes(point.id) ? 1 : 0.78} />)}</Svg>{selectedPoints.map((point) => { const markerY = activeMap ? point.y : assetYFromCanonical(side, point.y); return <View key={point.id} pointerEvents="none" style={[styles.selection, { left: point.x * mapWidth * zoom - 14, top: markerY * mapHeight * zoom - 14 }]}><Text style={styles.selectionText}>•</Text></View>; })}</Pressable></PinchGestureHandler></ScrollView></ScrollView></View></View>{lastSelectedPoint && <Text style={styles.selectedLabel}>{bodySiteDetailLabel(lastSelectedPoint.id)}</Text>}<Text style={styles.helper}>{zoom > 1.15 ? "A malha de pontos acompanha o corpo ampliado; toque diretamente na área da dor." : "Aproxime com dois dedos para revelar os pontos anatômicos sem sair desta tela."}</Text>
+    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>Pinça · {zoom.toFixed(1)}×</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><PinchGestureHandler onGestureEvent={handlePinch} onHandlerStateChange={handlePinchStateChange}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: renderedWidth, height: renderedHeight }]}>{!activeMap && <AnatomicalAsset side={side} width={renderedWidth} height={renderedHeight} />}<Svg width={renderedWidth} height={renderedHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none">{zoom > 1.15 && <GridOverlay width={mapWidth} height={mapHeight} />}{activeMap ? <DetailArt kind={activeMap.kind} site={activeMap.site} /> : null}<Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{zoom > 1.15 && points.map((point) => { const position = pointOnMap(point); return <Circle key={`target-${point.id}`} cx={position.x * mapWidth} cy={position.y * mapHeight} r={selectedDetails.includes(point.id) ? 9 : 5} fill={selectedDetails.includes(point.id) ? "#E98B5A" : "#176B87"} opacity={selectedDetails.includes(point.id) ? 1 : 0.78} />; })}</Svg>{selectedPoints.map((point) => { const position = pointOnMap(point); return <View key={point.id} pointerEvents="none" style={[styles.selection, { left: position.x * renderedWidth - 14, top: position.y * renderedHeight - 14 }]}><Text style={styles.selectionText}>•</Text></View>; })}</Pressable></PinchGestureHandler></ScrollView></ScrollView></View></View>{lastSelectedPoint && <Text style={styles.selectedLabel}>{bodySiteDetailLabel(lastSelectedPoint.id)}</Text>}<Text style={styles.helper}>{zoom > 1.15 ? "A malha de pontos acompanha o corpo ampliado; toque diretamente na área da dor." : "Aproxime com dois dedos para revelar os pontos anatômicos sem sair desta tela."}</Text>
   </View>;
 }
 
@@ -346,14 +353,8 @@ function GridOverlay({ width, height }: { width: number; height: number }) {
 
 export function resolveBodyPoint(side: Side, rawX: number, rawY: number): Point {
   const points = rootPointsForSide(side);
-  const x = Math.max(0, Math.min(1, rawX));
-  const y = canonicalBodyY(side, rawY);
-  const band = y < 0.22 ? points.filter((point) => point.coarse === "head" || point.coarse === "face" || point.coarse === "neck")
-    : y < 0.32 ? points.filter((point) => ["neck", "chest", "left-arm", "right-arm", "left-hand", "right-hand", "upper-back"].includes(point.coarse))
-    : y < 0.47 ? points.filter((point) => ["chest", "abdomen", "lower-back", "upper-back"].includes(point.coarse))
-    : y < 0.58 ? points.filter((point) => ["left-hip", "right-hip", "abdomen", "lower-back"].includes(point.coarse))
-    : points.filter((point) => ["left-thigh", "right-thigh", "left-knee", "right-knee", "left-leg", "right-leg", "left-foot", "right-foot"].includes(point.coarse));
-  return resolveDetailPoint(band.length ? band : points, x, y);
+  const bodyPoint = mapPointToBody(side, rawX, rawY, MAP_WIDTH / MAP_HEIGHT);
+  return resolveDetailPoint(points, bodyPoint.x, bodyPoint.y);
 }
 
 export function resolveSubmapPoint(site: BodySiteId, rawX: number, rawY: number): Point | undefined {
@@ -376,7 +377,20 @@ const WEB_ANATOMICAL_ASSETS: Record<Side, string> = { front: "/anatomical-front.
 
 function AnatomicalAsset({ side, width, height }: { side: Side; width: number; height: number }) {
   const source = Platform.OS === "web" ? { uri: WEB_ANATOMICAL_ASSETS[side] } : ANATOMICAL_ASSETS[side];
-  return <View pointerEvents="none" style={[styles.anatomicalAsset, { width, height }]}><Image source={source} resizeMode="contain" style={StyleSheet.absoluteFillObject} /></View>;
+  const rect = containedAssetRect(side, width / height);
+  return <Image
+    source={source}
+    resizeMode="stretch"
+    style={[
+      styles.anatomicalAsset,
+      {
+        left: rect.left * width,
+        top: rect.top * height,
+        width: rect.width * width,
+        height: rect.height * height,
+      },
+    ]}
+  />;
 }
 
 function DetailArt({ kind, site }: { kind: MapKind; site: BodySiteId }) {
