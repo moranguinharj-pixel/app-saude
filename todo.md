@@ -162,3 +162,7 @@
 - [x] Implementar zoom contínuo por pinça com a imagem corporal e os pontos X/Y na mesma tela.
 - [x] Criar malha anatômica mínima tipo batalha naval, alinhada a cada vista, para converter o toque em região sem exigir muitos cliques.
 - [x] Validar que rosto, mãos, pés, órgãos, tronco e pelve sejam identificados no mesmo mapa ampliado.
+
+- [x] Permitir toque direto na imagem anatômica detalhada, sem abertura de categoria ou submapa.
+- [x] Mapear o exemplo “cotovelo esquerdo, face interna” para uma nomenclatura anatômica automática.
+- [x] Usar alvos de toque tolerantes e feedback visual simples, adequados para pessoa idosa.
