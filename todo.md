@@ -166,3 +166,13 @@
 - [x] Permitir toque direto na imagem anatômica detalhada, sem abertura de categoria ou submapa.
 - [x] Mapear o exemplo “cotovelo esquerdo, face interna” para uma nomenclatura anatômica automática.
 - [x] Usar alvos de toque tolerantes e feedback visual simples, adequados para pessoa idosa.
+
+- [ ] Diagnosticar o travamento da compilação/publicação da Versão 11 e identificar a etapa afetada.
+- [ ] Validar ou recuperar um bundle Android compilável sem perder a seleção anatômica direta.
+
+- [x] Investigar o build Android da publicação preso em 1%, conforme captura do painel; o travamento foi confirmado no painel.
+- [x] Confirmar se o bloqueio está no serviço de publicação/quota ou na configuração do aplicativo; a configuração Expo é válida e o bundle local compila, indicando bloqueio do serviço/quota.
+- [ ] Orientar uma nova tentativa segura de geração do APK após a confirmação técnica.
+
+- [ ] Sincronizar no GitHub as alterações pendentes e preservar o histórico das versões anteriores.
+- [ ] Confirmar no remoto os commits e arquivos da versão atual do Registro Pessoal.
