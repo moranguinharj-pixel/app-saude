@@ -104,10 +104,10 @@ const FRONT_POINTS: Point[] = [
   { id: "breast-left-lower-inner", coarse: "chest", x: 0.54, y: 0.39 }, { id: "breast-left-lower-outer", coarse: "chest", x: 0.64, y: 0.39 },
   { id: "breast-left-nipple", coarse: "chest", x: 0.59, y: 0.35 }, { id: "breast-left-axillary-tail", coarse: "chest", x: 0.69, y: 0.31 },
   { id: "axilla-right", coarse: "chest", x: 0.27, y: 0.30 }, { id: "axilla-left", coarse: "chest", x: 0.73, y: 0.30 },
-  ...bodyHandPoints("right", 0.16),
-  ...bodyHandPoints("left", 0.84),
-  ...bodyFootPoints("right", 0.38),
-  ...bodyFootPoints("left", 0.62),
+  ...embeddedHandPoints("right", 0.28),
+  ...embeddedHandPoints("left", 0.72),
+  ...embeddedFootPoints("right", 0.42),
+  ...embeddedFootPoints("left", 0.58),
   { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.29, y: 0.285 },
   { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.71, y: 0.285 },
   { id: "right-deltoid", coarse: "right-shoulder", x: 0.27, y: 0.335 },
@@ -207,10 +207,10 @@ const BACK_POINTS: Point[] = [
   { id: "right-forearm-extensor", coarse: "right-arm", x: 0.23, y: 0.56 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.77, y: 0.56 },
   { id: "right-knee-inner", coarse: "right-knee", x: 0.47, y: 0.76 }, { id: "left-knee-inner", coarse: "left-knee", x: 0.53, y: 0.76 },
   { id: "right-knee-outer", coarse: "right-knee", x: 0.39, y: 0.76 }, { id: "left-knee-outer", coarse: "left-knee", x: 0.61, y: 0.76 },
-  ...bodyHandPoints("right", 0.16),
-  ...bodyHandPoints("left", 0.84),
-  ...bodyFootPoints("right", 0.38),
-  ...bodyFootPoints("left", 0.62),
+  ...embeddedHandPoints("right", 0.28),
+  ...embeddedHandPoints("left", 0.72),
+  ...embeddedFootPoints("right", 0.42),
+  ...embeddedFootPoints("left", 0.58),
   { id: "upper-back-left", coarse: "upper-back", x: 0.59, y: 0.29 },
   { id: "upper-back-right", coarse: "upper-back", x: 0.41, y: 0.29 },
   { id: "lower-back-left", coarse: "lower-back", x: 0.58, y: 0.42 },
@@ -324,6 +324,23 @@ function handPoints(coarse: "left-hand" | "right-hand"): Point[] {
     detail(`${coarse === "left-hand" ? "left" : "right"}-little-pip`, coarse, x(0.91), 0.38),
     detail(`${coarse === "left-hand" ? "left" : "right"}-little-dip`, coarse, x(0.91), 0.27),
   ];
+}
+
+function embeddedHandPoints(side: "left" | "right", centerX: number): Point[] {
+  return bodyHandPoints(side, centerX).map((point) => ({
+    ...point,
+    x: centerX + (point.x - centerX) * 0.14,
+    y: 0.535 + point.y * 0.24,
+  }));
+}
+
+function embeddedFootPoints(side: "left" | "right", centerX: number): Point[] {
+  const coarse = `${side}-foot` as "left-foot" | "right-foot";
+  return footPoints(coarse).map((point) => ({
+    ...point,
+    x: centerX + (point.x - 0.5) * 0.13,
+    y: 0.835 + point.y * 0.12,
+  }));
 }
 
 function footPoints(coarse: "left-foot" | "right-foot"): Point[] {

@@ -211,3 +211,8 @@
 - [x] Incluir pontos diretos para pescoço, orelhas e todas as regiões externas da cabeça aos pés.
 - [x] Incluir pontos diretos para articulações, músculos, mãos, dedos, pés, dedos dos pés e regiões internas projetadas.
 - [x] Garantir nomenclatura e lateralidade para cada ponto selecionável nas quatro vistas.
+
+- [x] Substituir as colunas de pontos fora do corpo por pontos anatômicos posicionados sobre a imagem detalhada.
+- [x] Tornar selecionáveis, por toque direto, todos os pontos dolorosos catalogados da cabeça aos pés nas quatro vistas.
+- [x] Gravar na ocorrência o identificador anatômico, nome exibido e lateralidade de cada ponto escolhido.
+- [x] Validar que o ponto visual selecionado seja o mesmo ponto mostrado na tabela e nos relatórios.
