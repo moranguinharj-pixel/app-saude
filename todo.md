@@ -216,3 +216,17 @@
 - [x] Tornar selecionáveis, por toque direto, todos os pontos dolorosos catalogados da cabeça aos pés nas quatro vistas.
 - [x] Gravar na ocorrência o identificador anatômico, nome exibido e lateralidade de cada ponto escolhido.
 - [x] Validar que o ponto visual selecionado seja o mesmo ponto mostrado na tabela e nos relatórios.
+
+- [x] Remover a renderização de pontos nas colunas laterais externas ao corpo.
+- [x] Unificar o sistema de coordenadas do asset anatômico, SVG, marcador e toque.
+- [x] Validar os marcadores sobre cabeça, tronco, braços, mãos, pernas e pés em 1× e com zoom.
+
+- [x] Remover completamente a grade tracejada e qualquer aparência de gráfico atrás do corpo.
+- [x] Exibir marcadores anatômicos nomeados sobre as estruturas desenhadas em cada vista.
+- [x] Garantir que tocar um marcador selecione seu nome, ID e lateralidade na ocorrência.
+- [x] Validar a nova apresentação sem grade, com zoom e pontos sobre o corpo.
+
+- [ ] Cobrir estruturas superficiais: pele, face, couro cabeludo, orelhas, mamas, axilas e regiões externas.
+- [ ] Cobrir estruturas musculoesqueléticas: ossos, costelas, coluna, articulações, músculos, tendões, ligamentos e bursas.
+- [ ] Cobrir estruturas profundas plausivelmente dolorosas: órgãos, pelve, nervos e regiões internas projetadas.
+- [ ] Relacionar cada estrutura a ID, nome anatômico e lateralidade sem presumir diagnóstico.

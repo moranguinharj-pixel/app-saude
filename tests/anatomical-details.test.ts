@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assetYFromCanonical, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
+import { assetXFromCanonical, assetYFromCanonical, canonicalBodyX, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
 import { buildPainReport } from "@/lib/pain-reports";
 import { BODY_SITE_DETAILS, PainEntry, bodySiteDetailLabel } from "@/shared/records";
 
@@ -41,6 +41,21 @@ describe("detalhamento anatômico da dor", () => {
     expect(lateralPointX("left", 0.29)).toBeCloseTo(0.6, 5);
     expect(lateralPointX("right", 0.56)).toBeCloseTo(0.25, 5);
     expect(canonicalBodyY("front", 0.15)).toBeLessThan(0.05);
+  });
+
+  it("mantém toque e marcador no mesmo espaço corporal", () => {
+    for (const side of ["front", "back", "left", "right"] as const) {
+      const canonicalX = 0.5;
+      const canonicalY = 0.5;
+      const assetX = assetXFromCanonical(side, canonicalX);
+      const assetY = assetYFromCanonical(side, canonicalY);
+      expect(canonicalBodyX(side, assetX)).toBeCloseTo(canonicalX, 5);
+      expect(canonicalBodyY(side, assetY)).toBeCloseTo(canonicalY, 5);
+      expect(assetX).toBeGreaterThan(0.3);
+      expect(assetX).toBeLessThan(0.7);
+      expect(assetY).toBeGreaterThan(0.09);
+      expect(assetY).toBeLessThan(0.91);
+    }
   });
 
   it("mantém estruturas finas de mãos, pés, mamas, músculos e órgãos", () => {

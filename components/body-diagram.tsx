@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { PinchGestureHandler, State } from "react-native-gesture-handler";
-import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Ellipse, G, Line, Path, Rect, Text as SvgText } from "react-native-svg";
 
 import { BodySiteDetailId, BodySiteId, bodySiteDetailLabel } from "@/shared/records";
-import { assetYFromCanonical, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
+import { assetXFromCanonical, assetYFromCanonical, canonicalBodyX, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
 import anatomicalFront from "../assets/images/anatomical-front.png";
 import anatomicalBack from "../assets/images/anatomical-back.png";
 import anatomicalLeftProfile from "../assets/images/anatomical-left-profile.png";
@@ -460,8 +460,8 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
 
   const handleMapPress = (event: any) => {
     const { locationX, locationY } = event.nativeEvent;
-    const normalizedX = locationX / renderedWidth;
-    const normalizedY = locationY / renderedHeight;
+    const normalizedX = canonicalBodyX(side, locationX / renderedWidth);
+    const normalizedY = canonicalBodyY(side, locationY / renderedHeight);
     const nearest = resolveBodyPoint(side, normalizedX, normalizedY);
     setLastSelectedPoint(nearest);
     onSelect(nearest.coarse);
@@ -472,17 +472,13 @@ export function BodyDiagram({ selected = [], selectedDetails = [], onSelect, onS
 
   return <View style={styles.root}>
     <View style={styles.sideToggle}><Pressable accessibilityRole="button" accessibilityLabel="Vista frontal" accessibilityState={{ selected: side === "front" }} onPress={() => onSideChange("front")} style={[styles.sideButton, side === "front" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "front" && styles.sideTextActive]}>Frente</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista posterior" accessibilityState={{ selected: side === "back" }} onPress={() => onSideChange("back")} style={[styles.sideButton, side === "back" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "back" && styles.sideTextActive]}>Costas</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral esquerda" accessibilityState={{ selected: side === "left" }} onPress={() => onSideChange("left")} style={[styles.sideButton, side === "left" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "left" && styles.sideTextActive]}>Lateral E</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Vista lateral direita" accessibilityState={{ selected: side === "right" }} onPress={() => onSideChange("right")} style={[styles.sideButton, side === "right" && styles.sideButtonActive]}><Text style={[styles.sideText, side === "right" && styles.sideTextActive]}>Lateral D</Text></Pressable></View>
-    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>Pinça · {zoom.toFixed(1)}×</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><PinchGestureHandler onGestureEvent={handlePinch} onHandlerStateChange={handlePinchStateChange}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: renderedWidth, height: renderedHeight }]}><AnatomicalAsset side={side} width={renderedWidth} height={renderedHeight} /><Svg width={renderedWidth} height={renderedHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none">{zoom > 1.15 && <GridOverlay width={mapWidth} height={mapHeight} />}<Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{zoom > 1.15 && points.map((point) => <Circle key={`target-${point.id}`} cx={point.x * mapWidth} cy={point.y * mapHeight} r={selectedDetails.includes(point.id) ? 9 : 5} fill={selectedDetails.includes(point.id) ? "#E98B5A" : "#176B87"} opacity={selectedDetails.includes(point.id) ? 1 : 0.78} />)}</Svg>{selectedPoints.map((point) => { const markerY = assetYFromCanonical(side, point.y); return <View key={point.id} pointerEvents="none" style={[styles.selection, { left: point.x * mapWidth * zoom - 14, top: markerY * mapHeight * zoom - 14 }]}><Text style={styles.selectionText}>•</Text></View>; })}</Pressable></PinchGestureHandler></ScrollView></ScrollView></View></View>{lastSelectedPoint && <Text style={styles.selectedLabel}>{bodySiteDetailLabel(lastSelectedPoint.id)}</Text>}<Text style={styles.helper}>{zoom > 1.15 ? "A malha de pontos acompanha o corpo ampliado; toque diretamente na área da dor." : "Aproxime com dois dedos para revelar os pontos anatômicos sem sair desta tela."}</Text>
+    <View style={styles.mapFrame}><View style={styles.zoomBar}><Pressable accessibilityRole="button" accessibilityLabel="Redefinir zoom" onPress={resetZoom} style={styles.zoomValue}><Text style={styles.zoomValueText}>Pinça · {zoom.toFixed(1)}×</Text></Pressable></View><View style={styles.viewport}><ScrollView horizontal contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}><PinchGestureHandler onGestureEvent={handlePinch} onHandlerStateChange={handlePinchStateChange}><Pressable accessibilityRole="imagebutton" accessibilityLabel={`${mapLabel}. Toque diretamente no local da dor.`} onPress={handleMapPress} style={[styles.map, { width: renderedWidth, height: renderedHeight }]}><AnatomicalAsset side={side} width={renderedWidth} height={renderedHeight} /><Svg width={renderedWidth} height={renderedHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} pointerEvents="none"><Rect x="0" y="0" width={mapWidth} height={mapHeight} fill="transparent" />{zoom > 1.15 && points.map((point) => { const x = assetXFromCanonical(side, point.x) * mapWidth; const y = assetYFromCanonical(side, point.y) * mapHeight; const selected = selectedDetails.includes(point.id); const label = zoom >= 2 ? bodySiteDetailLabel(point.id) : compactAnatomicalLabel(point.id); const labelX = x < mapWidth / 2 ? x + 8 : x - 8; return <G key={`target-${point.id}`}><Circle cx={x} cy={y} r={selected ? 9 : 5} fill={selected ? "#E98B5A" : "#176B87"} opacity={selected ? 1 : 0.9} /><SvgText x={labelX} y={y + 3} fill={selected ? "#9A4B26" : "#174B5A"} fontSize={zoom >= 2 ? 7 : 5} fontWeight={selected ? "700" : "500"} textAnchor={x < mapWidth / 2 ? "start" : "end"}>{label}</SvgText></G>; })}</Svg>{selectedPoints.map((point) => { const markerX = assetXFromCanonical(side, point.x); const markerY = assetYFromCanonical(side, point.y); return <View key={point.id} pointerEvents="none" style={[styles.selection, { left: markerX * mapWidth * zoom - 14, top: markerY * mapHeight * zoom - 14 }]}><Text style={styles.selectionText}>•</Text></View>; })}</Pressable></PinchGestureHandler></ScrollView></ScrollView></View></View>{lastSelectedPoint && <Text style={styles.selectedLabel}>{bodySiteDetailLabel(lastSelectedPoint.id)}</Text>}<Text style={styles.helper}>{zoom > 1.15 ? "A malha de pontos acompanha o corpo ampliado; toque diretamente na área da dor." : "Aproxime com dois dedos para revelar os pontos anatômicos sem sair desta tela."}</Text>
   </View>;
 }
 
-function GridOverlay({ width, height }: { width: number; height: number }) {
-  const columns = 6;
-  const rows = 12;
-  return <G opacity={0.34} pointerEvents="none">
-    {Array.from({ length: columns - 1 }, (_, index) => { const x = (width * (index + 1)) / columns; return <Line key={`grid-x-${index}`} x1={x} y1={0} x2={x} y2={height} stroke="#176B87" strokeWidth={0.7} strokeDasharray="3 5" />; })}
-    {Array.from({ length: rows - 1 }, (_, index) => { const y = (height * (index + 1)) / rows; return <Line key={`grid-y-${index}`} x1={0} y1={y} x2={width} y2={y} stroke="#176B87" strokeWidth={0.7} strokeDasharray="3 5" />; })}
-  </G>;
+function compactAnatomicalLabel(id: BodySiteDetailId): string {
+  const label = bodySiteDetailLabel(id);
+  return label.length > 22 ? `${label.slice(0, 21)}…` : label;
 }
 
 export function resolveBodyPoint(side: Side, rawX: number, rawY: number): Point {
