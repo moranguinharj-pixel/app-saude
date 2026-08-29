@@ -191,3 +191,10 @@
 
 - [x] Corrigir o enquadramento para mostrar cabeça, braços, mãos, pernas e pés simultaneamente.
 - [x] Validar o corpo inteiro em todas as quatro vistas sem perder o toque direto e o zoom.
+
+- [x] Ler os arquivos novos ou modificados no repositório privado `app-saude`; os documentos anatômicos foram revisados.
+- [x] Comparar as mudanças remotas com a última versão conhecida sem alterar o projeto local; não há commits novos no remoto.
+
+- [x] Auditar se cabeça, face, pescoço, tronco, membros, mãos, pés e regiões internas têm pontos selecionáveis.
+- [x] Conferir se cada ponto selecionável possui nomenclatura anatômica e lateralidade coerentes.
+- [x] Validar a cobertura nas quatro vistas e corrigir eventuais lacunas do mapa.
