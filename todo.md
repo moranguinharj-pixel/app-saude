@@ -230,3 +230,7 @@
 - [ ] Cobrir estruturas musculoesqueléticas: ossos, costelas, coluna, articulações, músculos, tendões, ligamentos e bursas.
 - [ ] Cobrir estruturas profundas plausivelmente dolorosas: órgãos, pelve, nervos e regiões internas projetadas.
 - [ ] Relacionar cada estrutura a ID, nome anatômico e lateralidade sem presumir diagnóstico.
+
+- [x] Exibir hotspots anatômicos sobre o corpo já em 1×, sem depender do zoom para revelar interação.
+- [x] Mostrar nomes curtos e legíveis dos pontos em 1×, ampliando a informação durante o zoom.
+- [x] Manter o toque direto, o zoom por pinça e a gravação do ponto selecionado na ocorrência.
