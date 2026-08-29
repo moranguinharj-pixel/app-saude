@@ -198,3 +198,16 @@
 - [x] Auditar se cabeça, face, pescoço, tronco, membros, mãos, pés e regiões internas têm pontos selecionáveis.
 - [x] Conferir se cada ponto selecionável possui nomenclatura anatômica e lateralidade coerentes.
 - [x] Validar a cobertura nas quatro vistas e corrigir eventuais lacunas do mapa.
+
+- [x] Confirmar se cada dedo e articulação das duas mãos possui ponto e nome selecionável.
+- [x] Confirmar se braços e antebraços possuem pontos musculares e articulares diretos, com lateralidade.
+- [x] Corrigir e validar qualquer lacuna encontrada nessa cobertura detalhada.
+
+- [x] Auditar integralmente a anatomia selecionável da cabeça aos pés nas quatro vistas.
+- [x] Mapear cada segmento corporal a uma nomenclatura detalhada e coerente.
+- [x] Corrigir lacunas de pontos diretos, incluindo estruturas superficiais, articulações, músculos e regiões internas projetadas.
+- [x] Validar a malha integral com testes de cobertura e exportação Android.
+
+- [x] Incluir pontos diretos para pescoço, orelhas e todas as regiões externas da cabeça aos pés.
+- [x] Incluir pontos diretos para articulações, músculos, mãos, dedos, pés, dedos dos pés e regiões internas projetadas.
+- [x] Garantir nomenclatura e lateralidade para cada ponto selecionável nas quatro vistas.

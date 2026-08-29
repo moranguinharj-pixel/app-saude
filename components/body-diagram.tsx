@@ -14,6 +14,70 @@ type Point = { id: BodySiteDetailId; coarse: BodySiteId; x: number; y: number };
 export type Side = "front" | "back" | "left" | "right";
 type MapKind = "face" | "chest" | "hand" | "foot" | "region";
 
+function bodyHandPoints(side: "left" | "right", centerX: number): Point[] {
+  const prefix = side === "left" ? "left" : "right";
+  const direction = side === "left" ? 1 : -1;
+  const x = (offset: number) => centerX + direction * offset;
+  return [
+    detail(`${prefix}-wrist`, `${prefix}-hand`, centerX, 0.625),
+    detail(`${prefix}-wrist-joint`, `${prefix}-hand`, centerX, 0.605),
+    detail(`${prefix}-hand-back`, `${prefix}-hand`, centerX, 0.575),
+    detail(`${prefix}-palm`, `${prefix}-hand`, centerX, 0.595),
+    detail(`${prefix}-thenar`, `${prefix}-hand`, x(0.018), 0.595),
+    detail(`${prefix}-hypothenar`, `${prefix}-hand`, x(0.018), 0.625),
+    detail(`${prefix}-thumb-metacarpal`, `${prefix}-hand`, x(0.028), 0.575),
+    detail(`${prefix}-thumb-cmc`, `${prefix}-hand`, x(0.038), 0.59),
+    detail(`${prefix}-thumb-mcp`, `${prefix}-hand`, x(0.052), 0.565),
+    detail(`${prefix}-thumb-ip`, `${prefix}-hand`, x(0.064), 0.54),
+    detail(`${prefix}-index-metacarpal`, `${prefix}-hand`, x(0.008), 0.555),
+    detail(`${prefix}-index-mcp`, `${prefix}-hand`, x(0.008), 0.535),
+    detail(`${prefix}-index-pip`, `${prefix}-hand`, x(0.008), 0.505),
+    detail(`${prefix}-index-dip`, `${prefix}-hand`, x(0.008), 0.48),
+    detail(`${prefix}-middle-metacarpal`, `${prefix}-hand`, x(0.016), 0.545),
+    detail(`${prefix}-middle-mcp`, `${prefix}-hand`, x(0.016), 0.52),
+    detail(`${prefix}-middle-pip`, `${prefix}-hand`, x(0.016), 0.485),
+    detail(`${prefix}-middle-dip`, `${prefix}-hand`, x(0.016), 0.455),
+    detail(`${prefix}-ring-metacarpal`, `${prefix}-hand`, x(0.024), 0.555),
+    detail(`${prefix}-ring-mcp`, `${prefix}-hand`, x(0.024), 0.535),
+    detail(`${prefix}-ring-pip`, `${prefix}-hand`, x(0.024), 0.505),
+    detail(`${prefix}-ring-dip`, `${prefix}-hand`, x(0.024), 0.48),
+    detail(`${prefix}-little-metacarpal`, `${prefix}-hand`, x(0.032), 0.57),
+    detail(`${prefix}-little-mcp`, `${prefix}-hand`, x(0.032), 0.55),
+    detail(`${prefix}-little-pip`, `${prefix}-hand`, x(0.032), 0.52),
+    detail(`${prefix}-little-dip`, `${prefix}-hand`, x(0.032), 0.495),
+  ];
+}
+
+function bodyFootPoints(side: "left" | "right", centerX: number): Point[] {
+  const prefix = side === "left" ? "left" : "right";
+  const direction = side === "left" ? 1 : -1;
+  const x = (offset: number) => centerX + direction * offset;
+  return [
+    detail(`${prefix}-ankle-inner`, `${prefix}-foot`, x(0.018), 0.90), detail(`${prefix}-ankle-outer`, `${prefix}-foot`, x(-0.018), 0.90),
+    detail(`${prefix}-heel`, `${prefix}-foot`, centerX, 0.94), detail(`${prefix}-arch`, `${prefix}-foot`, x(0.006), 0.955), detail(`${prefix}-metatarsal`, `${prefix}-foot`, centerX, 0.97),
+    detail(`${prefix}-big-toe-mtp`, `${prefix}-foot`, x(0.025), 0.985), detail(`${prefix}-big-toe-ip`, `${prefix}-foot`, x(0.038), 0.995),
+    detail(`${prefix}-second-toe-mtp`, `${prefix}-foot`, x(0.008), 0.985), detail(`${prefix}-second-toe-pip`, `${prefix}-foot`, x(0.008), 0.995), detail(`${prefix}-second-toe-dip`, `${prefix}-foot`, x(0.008), 1),
+    detail(`${prefix}-third-toe-mtp`, `${prefix}-foot`, x(-0.006), 0.985), detail(`${prefix}-third-toe-pip`, `${prefix}-foot`, x(-0.006), 0.995), detail(`${prefix}-third-toe-dip`, `${prefix}-foot`, x(-0.006), 1),
+    detail(`${prefix}-fourth-toe-mtp`, `${prefix}-foot`, x(-0.02), 0.985), detail(`${prefix}-fourth-toe-pip`, `${prefix}-foot`, x(-0.02), 0.995), detail(`${prefix}-fourth-toe-dip`, `${prefix}-foot`, x(-0.02), 1),
+    detail(`${prefix}-little-toe-mtp`, `${prefix}-foot`, x(-0.034), 0.985), detail(`${prefix}-little-toe-pip`, `${prefix}-foot`, x(-0.034), 0.995), detail(`${prefix}-little-toe-dip`, `${prefix}-foot`, x(-0.034), 1),
+    detail(`${prefix}-second-toe`, `${prefix}-foot`, x(0.008), 0.992), detail(`${prefix}-third-toe`, `${prefix}-foot`, x(-0.006), 0.992), detail(`${prefix}-fourth-toe`, `${prefix}-foot`, x(-0.02), 0.992), detail(`${prefix}-little-toe`, `${prefix}-foot`, x(-0.034), 0.992),
+  ];
+}
+
+const FRONT_INTERNAL_POINTS: Point[] = [
+  { id: "lung-right", coarse: "chest", x: 0.42, y: 0.34 }, { id: "lung-left", coarse: "chest", x: 0.58, y: 0.34 },
+  { id: "heart", coarse: "chest", x: 0.47, y: 0.38 }, { id: "diaphragm", coarse: "chest", x: 0.5, y: 0.43 },
+  { id: "pectoralis-right", coarse: "chest", x: 0.42, y: 0.30 }, { id: "pectoralis-left", coarse: "chest", x: 0.58, y: 0.30 },
+  { id: "liver", coarse: "abdomen", x: 0.62, y: 0.50 }, { id: "gallbladder", coarse: "abdomen", x: 0.66, y: 0.55 },
+  { id: "stomach", coarse: "abdomen", x: 0.38, y: 0.50 }, { id: "spleen", coarse: "abdomen", x: 0.34, y: 0.54 },
+  { id: "pancreas", coarse: "abdomen", x: 0.5, y: 0.55 }, { id: "bowel-left", coarse: "abdomen", x: 0.58, y: 0.64 },
+  { id: "bowel-right", coarse: "abdomen", x: 0.42, y: 0.64 }, { id: "rectus-abdominis", coarse: "abdomen", x: 0.5, y: 0.60 },
+  { id: "oblique-left", coarse: "abdomen", x: 0.64, y: 0.62 }, { id: "oblique-right", coarse: "abdomen", x: 0.36, y: 0.62 },
+  { id: "uterus", coarse: "abdomen", x: 0.5, y: 0.74 }, { id: "ovary-left", coarse: "left-hip", x: 0.55, y: 0.75 },
+  { id: "ovary-right", coarse: "right-hip", x: 0.45, y: 0.75 }, { id: "bladder", coarse: "abdomen", x: 0.5, y: 0.82 },
+  { id: "pubic-symphysis", coarse: "abdomen", x: 0.5, y: 0.86 },
+];
+
 const FRONT_POINTS: Point[] = [
   { id: "head-top", coarse: "head", x: 0.5, y: 0.018 },
   { id: "forehead-left", coarse: "head", x: 0.58, y: 0.07 },
@@ -33,8 +97,17 @@ const FRONT_POINTS: Point[] = [
   { id: "jaw-left", coarse: "face", x: 0.56, y: 0.18 },
   { id: "jaw-right", coarse: "face", x: 0.44, y: 0.18 },
   { id: "neck-front", coarse: "neck", x: 0.5, y: 0.225 },
-  { id: "hand-right-overview", coarse: "right-hand", x: 0.16, y: 0.3 },
-  { id: "hand-left-overview", coarse: "left-hand", x: 0.84, y: 0.3 },
+  { id: "breast-right-upper-inner", coarse: "chest", x: 0.46, y: 0.31 }, { id: "breast-right-upper-outer", coarse: "chest", x: 0.36, y: 0.31 },
+  { id: "breast-right-lower-inner", coarse: "chest", x: 0.46, y: 0.39 }, { id: "breast-right-lower-outer", coarse: "chest", x: 0.36, y: 0.39 },
+  { id: "breast-right-nipple", coarse: "chest", x: 0.41, y: 0.35 }, { id: "breast-right-axillary-tail", coarse: "chest", x: 0.31, y: 0.31 },
+  { id: "breast-left-upper-inner", coarse: "chest", x: 0.54, y: 0.31 }, { id: "breast-left-upper-outer", coarse: "chest", x: 0.64, y: 0.31 },
+  { id: "breast-left-lower-inner", coarse: "chest", x: 0.54, y: 0.39 }, { id: "breast-left-lower-outer", coarse: "chest", x: 0.64, y: 0.39 },
+  { id: "breast-left-nipple", coarse: "chest", x: 0.59, y: 0.35 }, { id: "breast-left-axillary-tail", coarse: "chest", x: 0.69, y: 0.31 },
+  { id: "axilla-right", coarse: "chest", x: 0.27, y: 0.30 }, { id: "axilla-left", coarse: "chest", x: 0.73, y: 0.30 },
+  ...bodyHandPoints("right", 0.16),
+  ...bodyHandPoints("left", 0.84),
+  ...bodyFootPoints("right", 0.38),
+  ...bodyFootPoints("left", 0.62),
   { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.29, y: 0.285 },
   { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.71, y: 0.285 },
   { id: "right-deltoid", coarse: "right-shoulder", x: 0.27, y: 0.335 },
@@ -90,30 +163,54 @@ const FRONT_POINTS: Point[] = [
   { id: "right-ankle-outer", coarse: "right-foot", x: 0.33, y: 0.91 },
   { id: "foot-left", coarse: "left-foot", x: 0.62, y: 0.94 },
   { id: "foot-right", coarse: "right-foot", x: 0.38, y: 0.94 },
+  ...FRONT_INTERNAL_POINTS,
 ];
 
 const LATERAL_POINTS: Record<"left" | "right", Point[]> = {
   left: [
-    { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "temple-left", coarse: "face", x: 0.52, y: 0.115 }, { id: "cheek-left", coarse: "face", x: 0.55, y: 0.16 }, { id: "jaw-left", coarse: "face", x: 0.52, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.46, y: 0.225 },
-    { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.44, y: 0.27 }, { id: "left-forearm-flexor", coarse: "left-arm", x: 0.34, y: 0.36 }, { id: "left-elbow-joint", coarse: "left-arm", x: 0.29, y: 0.46 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.25, y: 0.55 }, { id: "left-hand-back", coarse: "left-hand", x: 0.2, y: 0.63 },
+    { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "ear-left-upper", coarse: "face", x: 0.57, y: 0.13 }, { id: "ear-left-lower", coarse: "face", x: 0.57, y: 0.17 }, { id: "temple-left", coarse: "face", x: 0.52, y: 0.115 }, { id: "cheek-left", coarse: "face", x: 0.55, y: 0.16 }, { id: "jaw-left", coarse: "face", x: 0.52, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.46, y: 0.225 },
+    { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.44, y: 0.27 }, { id: "shoulder-left-joint", coarse: "left-shoulder", x: 0.42, y: 0.30 }, { id: "left-deltoid", coarse: "left-shoulder", x: 0.39, y: 0.33 }, { id: "left-biceps", coarse: "left-arm", x: 0.35, y: 0.37 }, { id: "left-triceps", coarse: "left-arm", x: 0.33, y: 0.40 }, { id: "left-forearm-flexor", coarse: "left-arm", x: 0.34, y: 0.45 }, { id: "left-elbow-joint", coarse: "left-arm", x: 0.29, y: 0.46 }, { id: "left-elbow-inner", coarse: "left-arm", x: 0.31, y: 0.47 }, { id: "left-elbow-outer", coarse: "left-arm", x: 0.27, y: 0.47 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.25, y: 0.55 }, { id: "left-hand-back", coarse: "left-hand", x: 0.2, y: 0.63 }, ...bodyHandPoints("left", 0.2), ...bodyFootPoints("left", 0.55),
     { id: "chest-left", coarse: "chest", x: 0.43, y: 0.32 }, { id: "rib-left-upper", coarse: "chest", x: 0.44, y: 0.39 }, { id: "abdomen-left-upper", coarse: "abdomen", x: 0.47, y: 0.47 }, { id: "flank-left", coarse: "abdomen", x: 0.39, y: 0.46 }, { id: "hip-left-side", coarse: "left-hip", x: 0.43, y: 0.54 }, { id: "groin-left", coarse: "left-hip", x: 0.47, y: 0.59 },
     { id: "thigh-left-front", coarse: "left-thigh", x: 0.45, y: 0.68 }, { id: "knee-left", coarse: "left-knee", x: 0.46, y: 0.77 }, { id: "left-calf-muscle", coarse: "left-leg", x: 0.44, y: 0.86 }, { id: "left-ankle-inner", coarse: "left-foot", x: 0.43, y: 0.94 }, { id: "foot-left", coarse: "left-foot", x: 0.55, y: 0.95 },
   ],
   right: [
-    { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "temple-right", coarse: "face", x: 0.48, y: 0.115 }, { id: "cheek-right", coarse: "face", x: 0.45, y: 0.16 }, { id: "jaw-right", coarse: "face", x: 0.48, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.54, y: 0.225 },
-    { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.56, y: 0.27 }, { id: "right-forearm-flexor", coarse: "right-arm", x: 0.66, y: 0.36 }, { id: "right-elbow-joint", coarse: "right-arm", x: 0.71, y: 0.46 }, { id: "right-forearm-extensor", coarse: "right-arm", x: 0.75, y: 0.55 }, { id: "right-hand-back", coarse: "right-hand", x: 0.8, y: 0.63 },
+    { id: "head-top", coarse: "head", x: 0.5, y: 0.018 }, { id: "ear-right-upper", coarse: "face", x: 0.43, y: 0.13 }, { id: "ear-right-lower", coarse: "face", x: 0.43, y: 0.17 }, { id: "temple-right", coarse: "face", x: 0.48, y: 0.115 }, { id: "cheek-right", coarse: "face", x: 0.45, y: 0.16 }, { id: "jaw-right", coarse: "face", x: 0.48, y: 0.19 }, { id: "neck-front", coarse: "neck", x: 0.54, y: 0.225 },
+    { id: "right-shoulder-ac", coarse: "right-shoulder", x: 0.56, y: 0.27 }, { id: "shoulder-right-joint", coarse: "right-shoulder", x: 0.58, y: 0.30 }, { id: "right-deltoid", coarse: "right-shoulder", x: 0.61, y: 0.33 }, { id: "right-biceps", coarse: "right-arm", x: 0.65, y: 0.37 }, { id: "right-triceps", coarse: "right-arm", x: 0.67, y: 0.40 }, { id: "right-forearm-flexor", coarse: "right-arm", x: 0.66, y: 0.45 }, { id: "right-elbow-joint", coarse: "right-arm", x: 0.71, y: 0.46 }, { id: "right-elbow-inner", coarse: "right-arm", x: 0.69, y: 0.47 }, { id: "right-elbow-outer", coarse: "right-arm", x: 0.73, y: 0.47 }, { id: "right-forearm-extensor", coarse: "right-arm", x: 0.75, y: 0.55 }, { id: "right-hand-back", coarse: "right-hand", x: 0.8, y: 0.63 }, ...bodyHandPoints("right", 0.8), ...bodyFootPoints("right", 0.45),
     { id: "chest-right", coarse: "chest", x: 0.57, y: 0.32 }, { id: "rib-right-upper", coarse: "chest", x: 0.56, y: 0.39 }, { id: "abdomen-right-upper", coarse: "abdomen", x: 0.53, y: 0.47 }, { id: "flank-right", coarse: "abdomen", x: 0.61, y: 0.46 }, { id: "hip-right-side", coarse: "right-hip", x: 0.57, y: 0.54 }, { id: "groin-right", coarse: "right-hip", x: 0.53, y: 0.59 },
     { id: "thigh-right-front", coarse: "right-thigh", x: 0.55, y: 0.68 }, { id: "knee-right", coarse: "right-knee", x: 0.54, y: 0.77 }, { id: "right-calf-muscle", coarse: "right-leg", x: 0.56, y: 0.86 }, { id: "right-ankle-outer", coarse: "right-foot", x: 0.57, y: 0.94 }, { id: "foot-right", coarse: "right-foot", x: 0.45, y: 0.95 },
   ],
 };
+
+const BACK_INTERNAL_POINTS: Point[] = [
+  { id: "cervical-spine", coarse: "neck", x: 0.5, y: 0.23 }, { id: "thoracic-spine", coarse: "upper-back", x: 0.5, y: 0.34 },
+  { id: "lumbar-spine", coarse: "lower-back", x: 0.5, y: 0.50 }, { id: "sacrum", coarse: "lower-back", x: 0.5, y: 0.63 },
+  { id: "coccyx", coarse: "lower-back", x: 0.5, y: 0.70 }, { id: "trapezius-left", coarse: "upper-back", x: 0.59, y: 0.28 },
+  { id: "trapezius-right", coarse: "upper-back", x: 0.41, y: 0.28 }, { id: "left-gluteus", coarse: "left-hip", x: 0.57, y: 0.56 },
+  { id: "right-gluteus", coarse: "right-hip", x: 0.43, y: 0.56 }, { id: "left-hamstring", coarse: "left-thigh", x: 0.57, y: 0.65 },
+  { id: "right-hamstring", coarse: "right-thigh", x: 0.43, y: 0.65 }, { id: "left-calf-muscle", coarse: "left-leg", x: 0.57, y: 0.82 },
+  { id: "right-calf-muscle", coarse: "right-leg", x: 0.43, y: 0.82 }, { id: "sacroiliac-left", coarse: "left-hip", x: 0.57, y: 0.48 },
+  { id: "sacroiliac-right", coarse: "right-hip", x: 0.43, y: 0.48 }, { id: "kidney-left", coarse: "lower-back", x: 0.58, y: 0.44 },
+  { id: "kidney-right", coarse: "lower-back", x: 0.42, y: 0.44 },
+];
 
 const BACK_POINTS: Point[] = [
   { id: "head-top", coarse: "head", x: 0.5, y: 0.018 },
   { id: "behind-head-left", coarse: "head", x: 0.59, y: 0.07 },
   { id: "behind-head-right", coarse: "head", x: 0.41, y: 0.07 },
   { id: "neck-back", coarse: "neck", x: 0.5, y: 0.225 },
-  { id: "hand-right-overview", coarse: "right-hand", x: 0.16, y: 0.3 },
-  { id: "hand-left-overview", coarse: "left-hand", x: 0.84, y: 0.3 },
+  { id: "shoulder-right-joint", coarse: "right-shoulder", x: 0.41, y: 0.28 }, { id: "shoulder-left-joint", coarse: "left-shoulder", x: 0.59, y: 0.28 },
+  { id: "right-deltoid", coarse: "right-shoulder", x: 0.35, y: 0.32 }, { id: "left-deltoid", coarse: "left-shoulder", x: 0.65, y: 0.32 },
+  { id: "right-triceps", coarse: "right-arm", x: 0.30, y: 0.39 }, { id: "left-triceps", coarse: "left-arm", x: 0.70, y: 0.39 },
+  { id: "right-elbow-joint", coarse: "right-arm", x: 0.27, y: 0.47 }, { id: "left-elbow-joint", coarse: "left-arm", x: 0.73, y: 0.47 },
+  { id: "right-elbow-inner", coarse: "right-arm", x: 0.30, y: 0.47 }, { id: "left-elbow-inner", coarse: "left-arm", x: 0.70, y: 0.47 },
+  { id: "right-elbow-outer", coarse: "right-arm", x: 0.24, y: 0.47 }, { id: "left-elbow-outer", coarse: "left-arm", x: 0.76, y: 0.47 },
+  { id: "right-forearm-extensor", coarse: "right-arm", x: 0.23, y: 0.56 }, { id: "left-forearm-extensor", coarse: "left-arm", x: 0.77, y: 0.56 },
+  { id: "right-knee-inner", coarse: "right-knee", x: 0.47, y: 0.76 }, { id: "left-knee-inner", coarse: "left-knee", x: 0.53, y: 0.76 },
+  { id: "right-knee-outer", coarse: "right-knee", x: 0.39, y: 0.76 }, { id: "left-knee-outer", coarse: "left-knee", x: 0.61, y: 0.76 },
+  ...bodyHandPoints("right", 0.16),
+  ...bodyHandPoints("left", 0.84),
+  ...bodyFootPoints("right", 0.38),
+  ...bodyFootPoints("left", 0.62),
   { id: "upper-back-left", coarse: "upper-back", x: 0.59, y: 0.29 },
   { id: "upper-back-right", coarse: "upper-back", x: 0.41, y: 0.29 },
   { id: "lower-back-left", coarse: "lower-back", x: 0.58, y: 0.42 },
@@ -126,6 +223,7 @@ const BACK_POINTS: Point[] = [
   { id: "calf-right", coarse: "right-leg", x: 0.43, y: 0.8 },
   { id: "foot-left", coarse: "left-foot", x: 0.62, y: 0.94 },
   { id: "foot-right", coarse: "right-foot", x: 0.38, y: 0.94 },
+  ...BACK_INTERNAL_POINTS,
 ];
 
 const FACE_POINTS: Point[] = [
@@ -377,8 +475,8 @@ export function resolveBodyPoint(side: Side, rawX: number, rawY: number): Point 
   const band = y < 0.22 ? points.filter((point) => point.coarse === "head" || point.coarse === "face" || point.coarse === "neck")
     : y < 0.32 ? points.filter((point) => ["neck", "chest", "left-shoulder", "right-shoulder", "left-arm", "right-arm", "left-hand", "right-hand", "upper-back"].includes(point.coarse))
     : y < 0.47 ? points.filter((point) => ["chest", "left-shoulder", "right-shoulder", "left-arm", "right-arm", "abdomen", "lower-back", "upper-back"].includes(point.coarse))
-    : y < 0.58 ? points.filter((point) => ["left-hip", "right-hip", "abdomen", "lower-back"].includes(point.coarse))
-    : points.filter((point) => ["left-thigh", "right-thigh", "left-knee", "right-knee", "left-leg", "right-leg", "left-foot", "right-foot"].includes(point.coarse));
+    : y < 0.58 ? points.filter((point) => ["left-hip", "right-hip", "abdomen", "lower-back", "left-arm", "right-arm", "left-hand", "right-hand"].includes(point.coarse))
+    : points.filter((point) => ["left-thigh", "right-thigh", "left-knee", "right-knee", "left-leg", "right-leg", "left-foot", "right-foot", "left-arm", "right-arm", "left-hand", "right-hand", "abdomen", "lower-back"].includes(point.coarse));
   return resolveDetailPoint(band.length ? band : points, x, y);
 }
 

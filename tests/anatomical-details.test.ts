@@ -52,6 +52,15 @@ describe("detalhamento anatômico da dor", () => {
       "right-quad",
       "uterus",
       "kidney-left",
+      "ear-left-upper", "ear-right-lower", "neck-front", "neck-back",
+      "lung-left", "heart", "liver", "stomach", "uterus", "bladder",
+      "cervical-spine", "thoracic-spine", "lumbar-spine", "sacrum", "coccyx",
+      "shoulder-left-joint", "right-deltoid", "left-biceps", "right-triceps",
+      "left-elbow-inner", "right-elbow-outer", "left-forearm-flexor", "right-forearm-extensor",
+      "left-wrist-joint", "right-wrist-joint", "left-index-mcp", "right-middle-dip",
+      "left-thenar", "right-hypothenar", "left-ankle-inner", "right-ankle-outer",
+      "left-heel", "right-arch", "left-big-toe-ip", "right-little-toe-dip",
+      "left-knee-inner", "right-knee-outer", "left-quad", "right-hamstring", "left-calf-muscle", "right-gluteus",
     ];
 
     const ids = BODY_SITE_DETAILS.map((site) => site.id);
