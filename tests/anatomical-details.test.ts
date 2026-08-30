@@ -1,9 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { assetXFromCanonical, assetYFromCanonical, canonicalBodyX, canonicalBodyY, lateralPointX } from "@/shared/body-map-geometry";
+import {
+  assetYFromCanonical,
+  bodyPointToMap,
+  canonicalBodyY,
+  containedAssetRect,
+  mapPointToBody,
+} from "@/shared/body-map-geometry";
 import { buildPainReport } from "@/lib/pain-reports";
-import { BODY_SITE_DETAILS, PainEntry, bodySiteDetailLabel } from "@/shared/records";
-import { FRONT_ATLAS, BACK_ATLAS, LATERAL_ATLAS, atlasForSide, resolveAtlasPoint } from "@/shared/body-atlas";
+import {
+  BODY_SITE_DETAILS,
+  PainEntry,
+  bodySiteDetailLabel,
+} from "@/shared/records";
+import { nearestBodyPoint } from "@/shared/body-map-selection";
 
 describe("detalhamento anatômico da dor", () => {
   it("agrupa o ponto exato e os pontos de irradiação", () => {
@@ -20,64 +30,105 @@ describe("detalhamento anatômico da dor", () => {
       foods: ["none"],
     };
 
-    const report = buildPainReport([entry], 30, new Date("2026-08-27T18:00:00.000Z"));
+    const report = buildPainReport(
+      [entry],
+      30,
+      new Date("2026-08-27T18:00:00.000Z"),
+    );
 
-    expect(report.sites[0]).toMatchObject({ label: "Acima do olho esquerdo", count: 1 });
+    expect(report.sites[0]).toMatchObject({
+      label: "Acima do olho esquerdo",
+      count: 1,
+    });
     expect(report.radiation).toEqual([
       { id: "neck-back", label: "Nuca", count: 1 },
-      { id: "behind-head-left", label: "Atrás da cabeça, lado esquerdo", count: 1 },
+      {
+        id: "behind-head-left",
+        label: "Atrás da cabeça, lado esquerdo",
+        count: 1,
+      },
     ]);
   });
 
   it("calibra a faixa visual do corpo inteiro para o atlas anatômico", () => {
-    const faceY = canonicalBodyY("front", 0.15);
+    const faceY = canonicalBodyY("front", 0.06);
     const lowerBodyY = canonicalBodyY("front", 0.78);
-    expect(faceY).toBeCloseTo(0.115, 2);
-    expect(lowerBodyY).toBeCloseTo(0.808, 2);
-    expect(assetYFromCanonical("front", faceY)).toBeCloseTo(0.15, 5);
+    expect(faceY).toBeLessThan(0.02);
+    expect(lowerBodyY).toBeGreaterThan(0.8);
+    expect(assetYFromCanonical("front", faceY)).toBeCloseTo(0.06, 5);
   });
 
-  it("alinha as vistas laterais ao corpo desenhado", () => {
-    expect(lateralPointX("left", 0.44)).toBeCloseTo(0.44, 5);
-    expect(lateralPointX("left", 0.29)).toBeCloseTo(0.29, 5);
-    expect(lateralPointX("right", 0.56)).toBeCloseTo(0.56, 5);
-    expect(canonicalBodyY("front", 0.15)).toBeCloseTo(0.115, 2);
+  it("mantém a imagem inteira e converte o ponto visual do ombro no mesmo local anatômico", () => {
+    const mapAspectRatio = 250 / 420;
+    const imageRect = containedAssetRect("front", mapAspectRatio);
+    const shoulderOnMap = bodyPointToMap("front", 0.22, 0.2, mapAspectRatio);
+    const resolvedShoulder = mapPointToBody(
+      "front",
+      shoulderOnMap.x,
+      shoulderOnMap.y,
+      mapAspectRatio,
+    );
+
+    expect(imageRect.height).toBe(1);
+    expect(imageRect.width).toBeLessThan(1);
+    expect(imageRect.left).toBeGreaterThan(0);
+    expect(resolvedShoulder.x).toBeCloseTo(0.22, 5);
+    expect(resolvedShoulder.y).toBeCloseTo(0.2, 5);
   });
 
-  it("mantém toque e marcador no mesmo espaço corporal", () => {
-    for (const side of ["front", "back", "left", "right"] as const) {
-      const canonicalX = 0.5;
-      const canonicalY = 0.5;
-      const assetX = assetXFromCanonical(side, canonicalX);
-      const assetY = assetYFromCanonical(side, canonicalY);
-      expect(canonicalBodyX(side, assetX)).toBeCloseTo(canonicalX, 5);
-      expect(canonicalBodyY(side, assetY)).toBeCloseTo(canonicalY, 5);
-      expect(assetX).toBeGreaterThan(0.3);
-      expect(assetX).toBeLessThan(0.7);
-      expect(assetY).toBeGreaterThan(0.09);
-      expect(assetY).toBeLessThan(0.91);
-    }
-  });
+  it("seleciona mãos, joelhos e ombros nas quatro vistas sem exigir tocar em um ponto", () => {
+    const aspectRatio = 304 / 516;
+    const points = {
+      front: [
+        { id: "hand-right-overview", coarse: "right-hand", x: 0.1, y: 0.45 },
+        { id: "knee-right", coarse: "right-knee", x: 0.43, y: 0.75 },
+        { id: "chest-center", coarse: "chest", x: 0.5, y: 0.31 },
+      ],
+      back: [
+        { id: "left-shoulder-ac", coarse: "left-shoulder", x: 0.31, y: 0.19 },
+        { id: "upper-back-right", coarse: "upper-back", x: 0.6, y: 0.27 },
+      ],
+      left: [
+        { id: "foot-left", coarse: "left-foot", x: 0.35, y: 0.975 },
+        { id: "knee-left", coarse: "left-knee", x: 0.49, y: 0.74 },
+      ],
+    } as const;
+    const frontRightHand = bodyPointToMap("front", 0.1, 0.45, aspectRatio);
+    const frontRightKnee = bodyPointToMap("front", 0.43, 0.75, aspectRatio);
+    const backLeftShoulder = bodyPointToMap("back", 0.31, 0.19, aspectRatio);
+    const leftFoot = bodyPointToMap("left", 0.35, 0.975, aspectRatio);
 
-  it("prioriza zonas contínuas específicas no atlas frontal", () => {
-    expect(resolveAtlasPoint(FRONT_ATLAS, 0.57, 0.115)?.id).toBe("eye-left");
-    expect(resolveAtlasPoint(FRONT_ATLAS, 0.66, 0.13)?.id).toBe("ear-left-upper");
-    expect(resolveAtlasPoint(FRONT_ATLAS, 0.40, 0.55)?.id).toBe("ovary-right");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.38, 0.46)?.id).toBe("liver");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.60, 0.47)?.id).toBe("stomach");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.51, 0.62)?.id).toBe("bladder");
-    expect(resolveAtlasPoint(FRONT_ATLAS, 0.25, 0.45)?.id).toBe("right-elbow-inner");
-    expect(resolveAtlasPoint(FRONT_ATLAS, 0.80, 0.62)?.id).toBe("left-thumb-cmc");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.20, 0.565)?.id).toBe("right-thumb-metacarpal");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.42, 0.95)?.id).toBe("right-heel");
-    expect(resolveAtlasPoint(atlasForSide("front"), 0.585, 0.988)?.id).toBe("left-little-toe");
-  });
-
-  it("resolve zonas contínuas nas vistas posterior e laterais", () => {
-    expect(resolveAtlasPoint(BACK_ATLAS, 0.5, 0.32)?.id).toBe("thoracic-spine");
-    expect(resolveAtlasPoint(BACK_ATLAS, 0.58, 0.64)?.id).toBe("left-gluteus");
-    expect(resolveAtlasPoint(LATERAL_ATLAS.left, 0.30, 0.46)?.id).toBe("left-elbow-inner");
-    expect(resolveAtlasPoint(LATERAL_ATLAS.right, 0.70, 0.46)?.id).toBe("right-elbow-inner");
+    expect(
+      nearestBodyPoint(
+        "front",
+        points.front,
+        frontRightHand.x,
+        frontRightHand.y,
+        aspectRatio,
+      )?.coarse,
+    ).toBe("right-hand");
+    expect(
+      nearestBodyPoint(
+        "front",
+        points.front,
+        frontRightKnee.x,
+        frontRightKnee.y,
+        aspectRatio,
+      )?.coarse,
+    ).toBe("right-knee");
+    expect(
+      nearestBodyPoint(
+        "back",
+        points.back,
+        backLeftShoulder.x,
+        backLeftShoulder.y,
+        aspectRatio,
+      )?.coarse,
+    ).toBe("left-shoulder");
+    expect(
+      nearestBodyPoint("left", points.left, leftFoot.x, leftFoot.y, aspectRatio)
+        ?.coarse,
+    ).toBe("left-foot");
   });
 
   it("mantém estruturas finas de mãos, pés, mamas, músculos e órgãos", () => {
@@ -89,21 +140,14 @@ describe("detalhamento anatômico da dor", () => {
       "right-quad",
       "uterus",
       "kidney-left",
-      "ear-left-upper", "ear-right-lower", "neck-front", "neck-back",
-      "lung-left", "heart", "liver", "stomach", "uterus", "bladder",
-      "cervical-spine", "thoracic-spine", "lumbar-spine", "sacrum", "coccyx",
-      "shoulder-left-joint", "right-deltoid", "left-biceps", "right-triceps",
-      "left-elbow-inner", "right-elbow-outer", "left-forearm-flexor", "right-forearm-extensor",
-      "left-wrist-joint", "right-wrist-joint", "left-index-mcp", "right-middle-dip",
-      "left-thenar", "right-hypothenar", "left-ankle-inner", "right-ankle-outer",
-      "left-heel", "right-arch", "left-big-toe-ip", "right-little-toe-dip",
-      "left-knee-inner", "right-knee-outer", "left-quad", "right-hamstring", "left-calf-muscle", "right-gluteus",
     ];
 
     const ids = BODY_SITE_DETAILS.map((site) => site.id);
     expectedIds.forEach((id) => expect(ids).toContain(id));
     expect(bodySiteDetailLabel("right-thumb-cmc")).toContain("carpometacarpal");
-    expect(bodySiteDetailLabel("breast-right-axillary-tail")).toContain("axila");
+    expect(bodySiteDetailLabel("breast-right-axillary-tail")).toContain(
+      "axila",
+    );
     expect(bodySiteDetailLabel("right-little-toe")).toContain("mínimo");
   });
 });

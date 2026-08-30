@@ -1,121 +1,95 @@
 import "@/global.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { Component, type ErrorInfo, type ReactNode, useEffect } from "react";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
-import { Platform } from "react-native";
-import "@/lib/_core/nativewind-pressable";
-import { ThemeProvider } from "@/lib/theme-provider";
+import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
+
 import { NotificationObserver } from "@/components/notification-observer";
-import {
-  SafeAreaFrameContext,
-  SafeAreaInsetsContext,
-  SafeAreaProvider,
-  initialWindowMetrics,
-} from "react-native-safe-area-context";
-import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
-
-import { trpc, createTRPCClient } from "@/lib/trpc";
-import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
-
-const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
-const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
+import { ThemeProvider } from "@/lib/theme-provider";
+import "@/lib/_core/nativewind-pressable";
 
 export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
-  const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
-  const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
+type StartupBoundaryState = { error: Error | null };
 
-  const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
-  const [frame, setFrame] = useState<Rect>(initialFrame);
+class StartupBoundary extends Component<{ children: ReactNode }, StartupBoundaryState> {
+  state: StartupBoundaryState = { error: null };
 
-  // Initialize Manus runtime for cookie injection from parent container
-  useEffect(() => {
-    initManusRuntime();
-  }, []);
-
-  const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
-    setInsets(metrics.insets);
-    setFrame(metrics.frame);
-  }, []);
-
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-    const unsubscribe = subscribeSafeAreaInsets(handleSafeAreaUpdate);
-    return () => unsubscribe();
-  }, [handleSafeAreaUpdate]);
-
-  // Create clients once and reuse them
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // Disable automatic refetching on window focus for mobile
-            refetchOnWindowFocus: false,
-            // Retry failed requests once
-            retry: 1,
-          },
-        },
-      }),
-  );
-  const [trpcClient] = useState(() => createTRPCClient());
-
-  // Ensure minimum 8px padding for top and bottom on mobile
-  const providerInitialMetrics = useMemo(() => {
-    const metrics = initialWindowMetrics ?? { insets: initialInsets, frame: initialFrame };
-    return {
-      ...metrics,
-      insets: {
-        ...metrics.insets,
-        top: Math.max(metrics.insets.top, 16),
-        bottom: Math.max(metrics.insets.bottom, 12),
-      },
-    };
-  }, [initialInsets, initialFrame]);
-
-  const content = (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
-          {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
-          {/* in order for ios apps tab switching to work properly, use presentation: "fullScreenModal" for login page, whenever you decide to use presentation: "modal*/}
-          <NotificationObserver />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="oauth/callback" />
-          </Stack>
-          <StatusBar style="auto" />
-        </QueryClientProvider>
-      </trpc.Provider>
-    </GestureHandlerRootView>
-  );
-
-  const shouldOverrideSafeArea = Platform.OS === "web";
-
-  if (shouldOverrideSafeArea) {
-    return (
-      <ThemeProvider>
-        <SafeAreaProvider initialMetrics={providerInitialMetrics}>
-          <SafeAreaFrameContext.Provider value={frame}>
-            <SafeAreaInsetsContext.Provider value={insets}>
-              {content}
-            </SafeAreaInsetsContext.Provider>
-          </SafeAreaFrameContext.Provider>
-        </SafeAreaProvider>
-      </ThemeProvider>
-    );
+  static getDerivedStateFromError(error: Error): StartupBoundaryState {
+    return { error };
   }
 
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("[Startup] Falha ao renderizar o aplicativo", error, info.componentStack);
+    void SplashScreen.hideAsync().catch(() => undefined);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={styles.errorScreen}>
+          <Text style={styles.errorTitle}>Não foi possível iniciar</Text>
+          <Text style={styles.errorText}>
+            Feche o Registro Pessoal e abra novamente. Seus dados permanecem salvos neste aparelho.
+          </Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default function RootLayout() {
+  useEffect(() => {
+    // A compilação instalada deve sair do logo mesmo se algum serviço opcional falhar.
+    void SplashScreen.hideAsync().catch(() => undefined);
+  }, []);
+
   return (
-    <ThemeProvider>
-      <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
-    </ThemeProvider>
+    <StartupBoundary>
+      <ThemeProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+          <GestureHandlerRootView style={styles.root}>
+            <NotificationObserver />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="oauth/callback" />
+            </Stack>
+            <StatusBar style="auto" />
+          </GestureHandlerRootView>
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </StartupBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  errorScreen: {
+    alignItems: "center",
+    backgroundColor: "#F7FAFC",
+    flex: 1,
+    justifyContent: "center",
+    padding: 28,
+  },
+  errorTitle: {
+    color: "#152A33",
+    fontSize: 22,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  errorText: {
+    color: "#60747C",
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 10,
+    textAlign: "center",
+  },
+});

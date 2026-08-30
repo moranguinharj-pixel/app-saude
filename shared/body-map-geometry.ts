@@ -44,3 +44,47 @@ export function lateralPointX(_side: "left" | "right", x: number): number {
   // Os PNGs laterais já são canvases próprios; não deslocar os pontos para outra metade.
   return Math.max(0, Math.min(1, x));
 }
+
+export type NormalizedPoint = { x: number; y: number };
+export type ContainedAssetRect = { left: number; top: number; width: number; height: number };
+
+// Dimensão proporcional dos assets anatômicos usados pelo ZIP e pelo app ativo.
+const ANATOMICAL_ASSET_ASPECT = 304 / 516;
+
+export function containedAssetRect(_side: AnatomicalSide, mapAspectRatio: number): ContainedAssetRect {
+  const safeAspect = mapAspectRatio > 0 ? mapAspectRatio : ANATOMICAL_ASSET_ASPECT;
+  if (ANATOMICAL_ASSET_ASPECT <= safeAspect) {
+    const width = ANATOMICAL_ASSET_ASPECT / safeAspect;
+    return { left: (1 - width) / 2, top: 0, width, height: 1 };
+  }
+  const height = safeAspect / ANATOMICAL_ASSET_ASPECT;
+  return { left: 0, top: (1 - height) / 2, width: 1, height };
+}
+
+export function bodyPointToMap(
+  side: AnatomicalSide,
+  canonicalX: number,
+  canonicalY: number,
+  mapAspectRatio: number,
+): NormalizedPoint {
+  const rect = containedAssetRect(side, mapAspectRatio);
+  return {
+    x: rect.left + assetXFromCanonical(side, canonicalX) * rect.width,
+    y: rect.top + assetYFromCanonical(side, canonicalY) * rect.height,
+  };
+}
+
+export function mapPointToBody(
+  side: AnatomicalSide,
+  mapX: number,
+  mapY: number,
+  mapAspectRatio: number,
+): NormalizedPoint {
+  const rect = containedAssetRect(side, mapAspectRatio);
+  const assetX = (mapX - rect.left) / rect.width;
+  const assetY = (mapY - rect.top) / rect.height;
+  return {
+    x: canonicalBodyX(side, assetX),
+    y: canonicalBodyY(side, assetY),
+  };
+}

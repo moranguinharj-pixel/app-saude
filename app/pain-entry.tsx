@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 
@@ -7,29 +17,74 @@ import { BodyDiagram } from "@/components/body-diagram";
 import { EmptyState } from "@/components/empty-state";
 import { PrimaryButton } from "@/components/primary-button";
 import { SectionTitle } from "@/components/section-title";
-import { addCustomFood, addFollowUp, addInAppNotification, addMedicationProfile, addPainEntry, loadAppData } from "@/lib/local-data";
+import {
+  addCustomFood,
+  addFollowUp,
+  addInAppNotification,
+  addMedicationProfile,
+  addPainEntry,
+  loadAppData,
+} from "@/lib/local-data";
 import { formatDateTime } from "@/lib/format";
 import { getCurrentWeather } from "@/lib/weather";
 import { schedulePainFollowUp } from "@/lib/notifications";
-import { AppData, BODY_SITES, BODY_SITE_DETAILS, BodySiteDetailId, BodySiteId, EMOTIONS, FOOD_TRIGGERS, LOCAL_SYMPTOMS, LocalSymptomId, makeId, MedicationProfile, MedicationUse, PAIN_TYPES, PainEntry, FoodProfile, bodySiteLabel } from "@/shared/records";
+import {
+  AppData,
+  BODY_SITES,
+  BODY_SITE_DETAILS,
+  BodySiteDetailId,
+  BodySiteId,
+  EMOTIONS,
+  FOOD_TRIGGERS,
+  LOCAL_SYMPTOMS,
+  LocalSymptomId,
+  makeId,
+  MedicationProfile,
+  MedicationUse,
+  PAIN_TYPES,
+  PainEntry,
+  FoodProfile,
+  bodySiteLabel,
+} from "@/shared/records";
 import { ScreenContainer } from "@/components/screen-container";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-const STEP_TITLES = ["Onde dói?", "Qual a intensidade?", "O que você sente no local?", "Como é a dor?", "Ela irradia?", "Está associada a outra dor?", "Como você está?", "O que você comeu?", "Medicamentos", "Pronto para salvar"];
+const STEP_TITLES = [
+  "Onde dói?",
+  "Qual a intensidade?",
+  "O que você sente no local?",
+  "Como é a dor?",
+  "Ela irradia?",
+  "Está associada a outra dor?",
+  "Como você está?",
+  "O que você comeu?",
+  "Medicamentos",
+  "Pronto para salvar",
+];
 
 export default function PainEntryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ site?: string }>();
-  const initialSite = BODY_SITES.some((site) => site.id === params.site) ? (params.site as BodySiteId) : undefined;
+  const initialSite = BODY_SITES.some((site) => site.id === params.site)
+    ? (params.site as BodySiteId)
+    : undefined;
   const [step, setStep] = useState<Step>(1);
-  const [side, setSide] = useState<"front" | "back" | "left" | "right">("front");
-  const [primarySite, setPrimarySite] = useState<BodySiteId | undefined>(initialSite);
-  const [primaryDetail, setPrimaryDetail] = useState<BodySiteDetailId | undefined>();
+  const [side, setSide] = useState<"front" | "back" | "left" | "right">(
+    "front",
+  );
+  const [primarySite, setPrimarySite] = useState<BodySiteId | undefined>(
+    initialSite,
+  );
+  const [primaryDetail, setPrimaryDetail] = useState<
+    BodySiteDetailId | undefined
+  >();
   const [intensity, setIntensity] = useState<number>();
   const [localSymptoms, setLocalSymptoms] = useState<LocalSymptomId[]>([]);
   const [painTypes, setPainTypes] = useState<string[]>([]);
   const [radiationSites, setRadiationSites] = useState<BodySiteId[]>([]);
-  const [radiationDetails, setRadiationDetails] = useState<BodySiteDetailId[]>([]);
+  const [radiationDetails, setRadiationDetails] = useState<BodySiteDetailId[]>(
+    [],
+  );
   const [noRadiation, setNoRadiation] = useState(false);
   const [associatedPainIds, setAssociatedPainIds] = useState<string[]>([]);
   const [emotion, setEmotion] = useState<string>();
@@ -37,33 +92,81 @@ export default function PainEntryScreen() {
   const [foods, setFoods] = useState<string[]>([]);
   const [foodPeriod, setFoodPeriod] = useState<"today" | "last24h">("today");
   const [medications, setMedications] = useState<MedicationUse[]>([]);
-  const [medicationHistory, setMedicationHistory] = useState<MedicationProfile[]>([]);
+  const [medicationHistory, setMedicationHistory] = useState<
+    MedicationProfile[]
+  >([]);
   const [customMedication, setCustomMedication] = useState("");
   const [customMedicationDose, setCustomMedicationDose] = useState("");
   const [customMedicationTime, setCustomMedicationTime] = useState("");
   const [customFoodName, setCustomFoodName] = useState("");
   const [customFoods, setCustomFoods] = useState<FoodProfile[]>([]);
-  const [data, setData] = useState<AppData>({ version: 2, healthEntries: [], weatherEntries: [], calendarEntries: [], painEntries: [], medicationHistory: [], customFoods: [], followUps: [], notifications: [], deletedPainEntries: [] });
+  const [data, setData] = useState<AppData>({
+    version: 2,
+    healthEntries: [],
+    weatherEntries: [],
+    calendarEntries: [],
+    painEntries: [],
+    medicationHistory: [],
+    customFoods: [],
+    followUps: [],
+    notifications: [],
+    deletedPainEntries: [],
+  });
   const [saving, setSaving] = useState(false);
   const [loadingWeather, setLoadingWeather] = useState(false);
+  const [mapInteracting, setMapInteracting] = useState(false);
 
-  useEffect(() => { loadAppData().then((loaded) => { setData(loaded); setMedicationHistory(loaded.medicationHistory); setCustomFoods(loaded.customFoods); }); }, []);
+  useEffect(() => {
+    loadAppData().then((loaded) => {
+      setData(loaded);
+      setMedicationHistory(loaded.medicationHistory);
+      setCustomFoods(loaded.customFoods);
+    });
+  }, []);
   const currentTitle = STEP_TITLES[step - 1];
-  const previousPains = useMemo(() => data.painEntries.slice(0, 30), [data.painEntries]);
+  const previousPains = useMemo(
+    () => data.painEntries.slice(0, 30),
+    [data.painEntries],
+  );
 
-  const selectPrimary = (site: BodySiteId) => { setPrimarySite(site); setPrimaryDetail(undefined); };
+  const selectPrimary = (site: BodySiteId) => {
+    setPrimarySite(site);
+    setPrimaryDetail(undefined);
+  };
   const selectPrimaryDetail = (id: BodySiteDetailId) => setPrimaryDetail(id);
-  const toggle = <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, id: T) => setter((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
-  const toggleRadiation = (site: BodySiteId) => { setNoRadiation(false); setRadiationSites((current) => current.includes(site) ? current.filter((value) => value !== site) : [...current, site]); };
+  const toggle = <T extends string>(
+    setter: React.Dispatch<React.SetStateAction<T[]>>,
+    id: T,
+  ) =>
+    setter((current) =>
+      current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id],
+    );
+  const toggleRadiation = (site: BodySiteId) => {
+    setNoRadiation(false);
+    setRadiationSites((current) =>
+      current.includes(site)
+        ? current.filter((value) => value !== site)
+        : [...current, site],
+    );
+  };
   const toggleRadiationDetail = (id: BodySiteDetailId) => {
     setNoRadiation(false);
     setRadiationDetails((current) => {
-      const next = current.includes(id) ? current.filter((value) => value !== id) : [...current, id];
+      const next = current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id];
       const coarse = BODY_SITE_DETAILS.find((site) => site.id === id)?.coarse;
       if (coarse) {
         setRadiationSites((sites) => {
-          const hasAnotherDetail = next.some((detailId) => BODY_SITE_DETAILS.find((site) => site.id === detailId)?.coarse === coarse);
-          if (hasAnotherDetail) return sites.includes(coarse) ? sites : [...sites, coarse];
+          const hasAnotherDetail = next.some(
+            (detailId) =>
+              BODY_SITE_DETAILS.find((site) => site.id === detailId)?.coarse ===
+              coarse,
+          );
+          if (hasAnotherDetail)
+            return sites.includes(coarse) ? sites : [...sites, coarse];
           return sites.filter((site) => site !== coarse);
         });
       }
@@ -71,53 +174,1198 @@ export default function PainEntryScreen() {
     });
   };
   const toggleFood = (id: string) => toggle(setFoods, id);
-  const addQuickMedication = async (profile: MedicationProfile, purpose: MedicationUse["purpose"]) => { const use: MedicationUse = { ...profile, purpose, takenAt: new Date().toISOString() }; setMedications((current) => [...current, use]); await addMedicationProfile(profile); };
-  const addCustomMedication = async (purpose: MedicationUse["purpose"]) => { const name = customMedication.trim(); if (!name) return; const profile = { id: makeId("med"), name, dose: customMedicationDose.trim() || undefined }; const use: MedicationUse = { ...profile, purpose, takenAt: customMedicationTime.trim() || new Date().toISOString() }; setMedications((current) => [...current, use]); await addMedicationProfile(profile); setCustomMedication(""); setCustomMedicationDose(""); setCustomMedicationTime(""); };
-  const addCustomFoodOption = async () => { const label = customFoodName.trim(); if (!label) return; const profile = { id: makeId("food"), label }; setCustomFoods((current) => [...current, profile]); await addCustomFood(profile); setFoods((current) => [...current, profile.id]); setCustomFoodName(""); };
+  const addQuickMedication = async (
+    profile: MedicationProfile,
+    purpose: MedicationUse["purpose"],
+  ) => {
+    const use: MedicationUse = {
+      ...profile,
+      purpose,
+      takenAt: new Date().toISOString(),
+    };
+    setMedications((current) => [...current, use]);
+    await addMedicationProfile(profile);
+  };
+  const addCustomMedication = async (purpose: MedicationUse["purpose"]) => {
+    const name = customMedication.trim();
+    if (!name) return;
+    const profile = {
+      id: makeId("med"),
+      name,
+      dose: customMedicationDose.trim() || undefined,
+    };
+    const use: MedicationUse = {
+      ...profile,
+      purpose,
+      takenAt: customMedicationTime.trim() || new Date().toISOString(),
+    };
+    setMedications((current) => [...current, use]);
+    await addMedicationProfile(profile);
+    setCustomMedication("");
+    setCustomMedicationDose("");
+    setCustomMedicationTime("");
+  };
+  const addCustomFoodOption = async () => {
+    const label = customFoodName.trim();
+    if (!label) return;
+    const profile = { id: makeId("food"), label };
+    setCustomFoods((current) => [...current, profile]);
+    await addCustomFood(profile);
+    setFoods((current) => [...current, profile.id]);
+    setCustomFoodName("");
+  };
 
-  const previous = () => { if (step === 1) { router.back(); return; } setStep((step - 1) as Step); };
+  const previous = () => {
+    if (step === 1) {
+      router.back();
+      return;
+    }
+    setStep((step - 1) as Step);
+  };
   const next = () => {
-    if (step === 1 && (!primarySite || !primaryDetail)) { Alert.alert("Detalhe o local", "Toque no ponto exato da imagem corporal."); return; }
-    if (step === 2 && !intensity) { Alert.alert("Escolha a intensidade", "Toque em um número de 1 a 10."); return; }
-    if (step === 4 && !painTypes.length) { Alert.alert("Escolha a sensação", "Selecione pelo menos um tipo de dor."); return; }
-    if (step === 7 && !emotions.length) { Alert.alert("Escolha uma emoção", "Toque em uma ou mais emoções."); return; }
-    if (step < 10) setStep((step + 1) as Step); else save();
+    if (step === 1 && (!primarySite || !primaryDetail)) {
+      Alert.alert(
+        "Detalhe o local",
+        "Toque no ponto exato da imagem corporal.",
+      );
+      return;
+    }
+    if (step === 2 && !intensity) {
+      Alert.alert("Escolha a intensidade", "Toque em um número de 1 a 10.");
+      return;
+    }
+    if (step === 4 && !painTypes.length) {
+      Alert.alert("Escolha a sensação", "Selecione pelo menos um tipo de dor.");
+      return;
+    }
+    if (step === 7 && !emotions.length) {
+      Alert.alert("Escolha uma emoção", "Toque em uma ou mais emoções.");
+      return;
+    }
+    if (step < 10) setStep((step + 1) as Step);
+    else save();
   };
 
   const save = async () => {
-    if (!primarySite || !primaryDetail || !intensity || !painTypes.length || !emotion) return;
-    setSaving(true); setLoadingWeather(true);
+    if (
+      !primarySite ||
+      !primaryDetail ||
+      !intensity ||
+      !painTypes.length ||
+      !emotion
+    )
+      return;
+    setSaving(true);
+    setLoadingWeather(true);
     let weather: PainEntry["weather"];
     try {
-      if (await Location.hasServicesEnabledAsync()) { const permission = await Location.requestForegroundPermissionsAsync(); if (permission.status === "granted") { const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }); const current = await getCurrentWeather(position.coords.latitude, position.coords.longitude); const addresses = await Location.reverseGeocodeAsync({ latitude: position.coords.latitude, longitude: position.coords.longitude }); const address = addresses[0]; weather = { ...current, locality: [address?.city, address?.region].filter(Boolean).join(", ") || undefined }; } }
-    } catch { /* O registro continua salvo mesmo sem clima. */ }
-    try { const painId = makeId("pain"); await addPainEntry({ id: painId, occurredAt: new Date().toISOString(), primarySite, primaryDetail, intensity, localSymptoms, painTypes, radiationSites: noRadiation ? [] : radiationSites, radiationDetails: noRadiation ? [] : radiationDetails, associatedPainIds, emotion: emotions[0] ?? emotion ?? "unknown", emotions, foods, foodPeriod, medications, weather }); const followUpId = makeId("followup"); const scheduledAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(); await addFollowUp({ id: followUpId, painEntryId: painId, scheduledAt, medicationName: medications.find((item) => item.purpose === "pain-control")?.name, status: "pending" }); const medicationName = medications.find((item) => item.purpose === "pain-control")?.name; await addInAppNotification({ id: `scheduled-${followUpId}`, kind: "pain-follow-up", title: medicationName ? `Acompanhar dor com ${medicationName}` : "Acompanhar sua dor", body: "Lembrete programado para daqui a 2 horas.", createdAt: new Date().toISOString(), followUpId, painEntryId: painId }); await schedulePainFollowUp(followUpId, medicationName); Alert.alert("Dor registrada com sucesso!", "Um lembrete será enviado em 2 horas para você acompanhar a evolução.", [{ text: "OK", onPress: () => router.back() }]); } catch { Alert.alert("Não foi possível salvar", "Tente novamente."); } finally { setSaving(false); setLoadingWeather(false); }
+      if (await Location.hasServicesEnabledAsync()) {
+        const permission = await Location.requestForegroundPermissionsAsync();
+        if (permission.status === "granted") {
+          const position = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          const current = await getCurrentWeather(
+            position.coords.latitude,
+            position.coords.longitude,
+          );
+          const addresses = await Location.reverseGeocodeAsync({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          const address = addresses[0];
+          weather = {
+            ...current,
+            locality:
+              [address?.city, address?.region].filter(Boolean).join(", ") ||
+              undefined,
+          };
+        }
+      }
+    } catch {
+      /* O registro continua salvo mesmo sem clima. */
+    }
+    try {
+      const painId = makeId("pain");
+      await addPainEntry({
+        id: painId,
+        occurredAt: new Date().toISOString(),
+        primarySite,
+        primaryDetail,
+        intensity,
+        localSymptoms,
+        painTypes,
+        radiationSites: noRadiation ? [] : radiationSites,
+        radiationDetails: noRadiation ? [] : radiationDetails,
+        associatedPainIds,
+        emotion: emotions[0] ?? emotion ?? "unknown",
+        emotions,
+        foods,
+        foodPeriod,
+        medications,
+        weather,
+      });
+      const followUpId = makeId("followup");
+      const scheduledAt = new Date(
+        Date.now() + 2 * 60 * 60 * 1000,
+      ).toISOString();
+      await addFollowUp({
+        id: followUpId,
+        painEntryId: painId,
+        scheduledAt,
+        medicationName: medications.find(
+          (item) => item.purpose === "pain-control",
+        )?.name,
+        status: "pending",
+      });
+      const medicationName = medications.find(
+        (item) => item.purpose === "pain-control",
+      )?.name;
+      await addInAppNotification({
+        id: `scheduled-${followUpId}`,
+        kind: "pain-follow-up",
+        title: medicationName
+          ? `Acompanhar dor com ${medicationName}`
+          : "Acompanhar sua dor",
+        body: "Lembrete programado para daqui a 2 horas.",
+        createdAt: new Date().toISOString(),
+        followUpId,
+        painEntryId: painId,
+      });
+      await schedulePainFollowUp(followUpId, medicationName);
+      Alert.alert(
+        "Dor registrada com sucesso!",
+        "Um lembrete será enviado em 2 horas para você acompanhar a evolução.",
+        [{ text: "OK", onPress: () => router.back() }],
+      );
+    } catch {
+      Alert.alert("Não foi possível salvar", "Tente novamente.");
+    } finally {
+      setSaving(false);
+      setLoadingWeather(false);
+    }
   };
 
-  return <ScreenContainer className="px-5" edges={["top", "bottom", "left", "right"]} containerClassName="bg-background"><KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}><View style={styles.topline}><Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={previous} style={styles.back}><Text style={styles.backText}>‹</Text></Pressable><Text style={styles.progress}>{step} de 10</Text></View><SectionTitle eyebrow="Registro rápido" title={currentTitle} detail={step === 1 ? "Toque na imagem corporal e depois aproxime o mapa, se necessário." : "Escolha o que se aplica; texto é opcional."} />
-      {step === 1 ? <><BodyDiagram selected={primarySite ? [primarySite] : []} selectedDetails={primaryDetail ? [primaryDetail] : []} onSelect={selectPrimary} onSelectDetail={selectPrimaryDetail} side={side} onSideChange={setSide} />{primarySite ? <Text accessibilityRole="text" style={styles.mapConfirmation}>Ponto selecionado</Text> : <EmptyState icon={<Text style={styles.emptyEmoji}>⌖</Text>} title="Toque diretamente no corpo" description="O app identifica automaticamente a área mais próxima." />}</> : null}
-      {step === 2 ? <IntensityStep value={intensity} onSelect={setIntensity} /> : null}
-      {step === 3 ? <ChoiceGrid items={LOCAL_SYMPTOMS} selected={localSymptoms} onToggle={(id) => toggle(setLocalSymptoms, id as LocalSymptomId)} columns={2} /> : null}
-      {step === 4 ? <ChoiceGrid items={PAIN_TYPES} selected={painTypes} onToggle={(id) => toggle(setPainTypes, id)} columns={3} /> : null}
-      {step === 5 ? <><Text style={styles.optionalHint}>Opcional — você pode continuar sem informar a irradiação.</Text><Pressable accessibilityRole="button" accessibilityState={{ selected: noRadiation }} onPress={() => { setNoRadiation(true); setRadiationSites([]); setRadiationDetails([]); }} style={[styles.noneButton, noRadiation && styles.noneButtonActive]}><Text style={[styles.noneText, noRadiation && styles.noneTextActive]}>Não informar irradiação</Text></Pressable><BodyDiagram selected={radiationSites} selectedDetails={radiationDetails} onSelect={toggleRadiation} onSelectDetail={toggleRadiationDetail} multi side={side} onSideChange={setSide} />{radiationDetails.length ? <Text accessibilityRole="text" style={styles.mapConfirmation}>Trajeto registrado</Text> : null}</> : null}
-      {step === 6 ? <AssociationStep pains={previousPains} selected={associatedPainIds} onToggle={(id) => toggle(setAssociatedPainIds, id)} /> : null}
-      {step === 7 ? <><Text style={styles.optionalHint}>Selecione uma ou mais emoções.</Text><ChoiceGrid items={[...EMOTIONS, { id: "empty-emotion-1", label: "", icon: "" }, { id: "empty-emotion-2", label: "", icon: "" }]} selected={emotions} onToggle={(id) => { if (!id.startsWith("empty-")) { setEmotion(id); toggle(setEmotions, id); } }} columns={4} /><Text style={styles.selectionCount}>{emotions.length} selecionada{emotions.length === 1 ? "" : "s"}</Text></> : null}
-      {step === 8 ? <FoodStep selected={foods} period={foodPeriod} customFoods={customFoods} customName={customFoodName} onCustomName={setCustomFoodName} onAddCustom={addCustomFoodOption} onPeriodChange={setFoodPeriod} onToggle={toggleFood} /> : null}
-      {step === 9 ? <MedicationStep history={medicationHistory} selected={medications} customName={customMedication} customDose={customMedicationDose} customTime={customMedicationTime} onCustomName={setCustomMedication} onCustomDose={setCustomMedicationDose} onCustomTime={setCustomMedicationTime} onAdd={addQuickMedication} onAddCustom={addCustomMedication} onRemove={(id, purpose) => setMedications((current) => current.filter((item) => !(item.id === id && item.purpose === purpose)))} /> : null}
-      {step === 10 ? <ReviewStep primaryDetail={primaryDetail} primarySite={primarySite} intensity={intensity} symptoms={localSymptoms} painTypes={painTypes} emotion={emotion} foodCount={foods.length} medicationCount={medications.length} /> : null}
-      <View style={styles.actions}><PrimaryButton label={step === 10 ? "Salvar ocorrência" : "Continuar"} variant="primary" onPress={next} loading={saving || loadingWeather} /><Text style={styles.privacy}>Horário e clima são capturados automaticamente. Tudo fica somente neste aparelho.</Text></View></ScrollView></KeyboardAvoidingView></ScreenContainer>;
+  return (
+    <ScreenContainer
+      className="px-5"
+      edges={["top", "bottom", "left", "right"]}
+      containerClassName="bg-background"
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.root}
+      >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          scrollEnabled={!mapInteracting}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.topline}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+              onPress={previous}
+              style={styles.back}
+            >
+              <Text style={styles.backText}>‹</Text>
+            </Pressable>
+            <Text style={styles.progress}>{step} de 10</Text>
+          </View>
+          <SectionTitle
+            eyebrow="Registro rápido"
+            title={currentTitle}
+            detail={
+              step === 1
+                ? "Toque na imagem corporal e depois aproxime o mapa, se necessário."
+                : "Escolha o que se aplica; texto é opcional."
+            }
+          />
+          {step === 1 ? (
+            <>
+              <BodyDiagram
+                selected={primarySite ? [primarySite] : []}
+                selectedDetails={primaryDetail ? [primaryDetail] : []}
+                onSelect={selectPrimary}
+                onSelectDetail={selectPrimaryDetail}
+                side={side}
+                onSideChange={setSide}
+                onInteractionChange={setMapInteracting}
+              />
+              {primarySite ? (
+                <Text accessibilityRole="text" style={styles.mapConfirmation}>
+                  Ponto selecionado
+                </Text>
+              ) : (
+                <EmptyState
+                  icon={<Text style={styles.emptyEmoji}>⌖</Text>}
+                  title="Toque diretamente no corpo"
+                  description="O app identifica automaticamente a área mais próxima."
+                />
+              )}
+            </>
+          ) : null}
+          {step === 2 ? (
+            <IntensityStep value={intensity} onSelect={setIntensity} />
+          ) : null}
+          {step === 3 ? (
+            <ChoiceGrid
+              items={LOCAL_SYMPTOMS}
+              selected={localSymptoms}
+              onToggle={(id) => toggle(setLocalSymptoms, id as LocalSymptomId)}
+              columns={2}
+            />
+          ) : null}
+          {step === 4 ? (
+            <ChoiceGrid
+              items={PAIN_TYPES}
+              selected={painTypes}
+              onToggle={(id) => toggle(setPainTypes, id)}
+              columns={3}
+            />
+          ) : null}
+          {step === 5 ? (
+            <>
+              <Text style={styles.optionalHint}>
+                Opcional — você pode continuar sem informar a irradiação.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected: noRadiation }}
+                onPress={() => {
+                  setNoRadiation(true);
+                  setRadiationSites([]);
+                  setRadiationDetails([]);
+                }}
+                style={[
+                  styles.noneButton,
+                  noRadiation && styles.noneButtonActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.noneText,
+                    noRadiation && styles.noneTextActive,
+                  ]}
+                >
+                  Não informar irradiação
+                </Text>
+              </Pressable>
+              <BodyDiagram
+                selected={radiationSites}
+                selectedDetails={radiationDetails}
+                onSelect={toggleRadiation}
+                onSelectDetail={toggleRadiationDetail}
+                multi
+                side={side}
+                onSideChange={setSide}
+                onInteractionChange={setMapInteracting}
+              />
+              {radiationDetails.length ? (
+                <Text accessibilityRole="text" style={styles.mapConfirmation}>
+                  Trajeto registrado
+                </Text>
+              ) : null}
+            </>
+          ) : null}
+          {step === 6 ? (
+            <AssociationStep
+              pains={previousPains}
+              selected={associatedPainIds}
+              onToggle={(id) => toggle(setAssociatedPainIds, id)}
+            />
+          ) : null}
+          {step === 7 ? (
+            <>
+              <Text style={styles.optionalHint}>
+                Selecione uma ou mais emoções.
+              </Text>
+              <ChoiceGrid
+                items={[
+                  ...EMOTIONS,
+                  { id: "empty-emotion-1", label: "", icon: "" },
+                  { id: "empty-emotion-2", label: "", icon: "" },
+                ]}
+                selected={emotions}
+                onToggle={(id) => {
+                  if (!id.startsWith("empty-")) {
+                    setEmotion(id);
+                    toggle(setEmotions, id);
+                  }
+                }}
+                columns={4}
+              />
+              <Text style={styles.selectionCount}>
+                {emotions.length} selecionada{emotions.length === 1 ? "" : "s"}
+              </Text>
+            </>
+          ) : null}
+          {step === 8 ? (
+            <FoodStep
+              selected={foods}
+              period={foodPeriod}
+              customFoods={customFoods}
+              customName={customFoodName}
+              onCustomName={setCustomFoodName}
+              onAddCustom={addCustomFoodOption}
+              onPeriodChange={setFoodPeriod}
+              onToggle={toggleFood}
+            />
+          ) : null}
+          {step === 9 ? (
+            <MedicationStep
+              history={medicationHistory}
+              selected={medications}
+              customName={customMedication}
+              customDose={customMedicationDose}
+              customTime={customMedicationTime}
+              onCustomName={setCustomMedication}
+              onCustomDose={setCustomMedicationDose}
+              onCustomTime={setCustomMedicationTime}
+              onAdd={addQuickMedication}
+              onAddCustom={addCustomMedication}
+              onRemove={(id, purpose) =>
+                setMedications((current) =>
+                  current.filter(
+                    (item) => !(item.id === id && item.purpose === purpose),
+                  ),
+                )
+              }
+            />
+          ) : null}
+          {step === 10 ? (
+            <ReviewStep
+              primaryDetail={primaryDetail}
+              primarySite={primarySite}
+              intensity={intensity}
+              symptoms={localSymptoms}
+              painTypes={painTypes}
+              emotion={emotion}
+              foodCount={foods.length}
+              medicationCount={medications.length}
+            />
+          ) : null}
+          <View style={styles.actions}>
+            <PrimaryButton
+              label={step === 10 ? "Salvar ocorrência" : "Continuar"}
+              variant="primary"
+              onPress={next}
+              loading={saving || loadingWeather}
+            />
+            <Text style={styles.privacy}>
+              Horário e clima são capturados automaticamente. Tudo fica somente
+              neste aparelho.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ScreenContainer>
+  );
 }
 
-function AssociationStep({ pains, selected, onToggle }: { pains: PainEntry[]; selected: string[]; onToggle: (id: string) => void }) { if (!pains.length) return <EmptyState icon={<Text style={styles.emptyEmoji}>↔</Text>} title="Ainda não há outras dores" description="Quando houver ocorrências anteriores, elas aparecerão aqui para associação opcional." />; return <View><Text style={styles.question}>Está associado a outra dor?</Text><Text style={styles.smallHelp}>Selecione uma ou várias ocorrências anteriores, se perceber uma relação.</Text><View style={styles.associationList}>{pains.map((pain) => <Pressable key={pain.id} onPress={() => onToggle(pain.id)} style={[styles.association, selected.includes(pain.id) && styles.associationActive]}><Text style={styles.associationTitle}>{bodySiteLabel(pain.primaryDetail ?? pain.primarySite)}</Text><Text style={styles.associationDetail}>Intensidade {pain.intensity}/10 · {formatDateTime(pain.occurredAt)}</Text><Text style={styles.associationCheck}>{selected.includes(pain.id) ? "✓" : "○"}</Text></Pressable>)}</View></View>; }
+function AssociationStep({
+  pains,
+  selected,
+  onToggle,
+}: {
+  pains: PainEntry[];
+  selected: string[];
+  onToggle: (id: string) => void;
+}) {
+  if (!pains.length)
+    return (
+      <EmptyState
+        icon={<Text style={styles.emptyEmoji}>↔</Text>}
+        title="Ainda não há outras dores"
+        description="Quando houver ocorrências anteriores, elas aparecerão aqui para associação opcional."
+      />
+    );
+  return (
+    <View>
+      <Text style={styles.question}>Está associado a outra dor?</Text>
+      <Text style={styles.smallHelp}>
+        Selecione uma ou várias ocorrências anteriores, se perceber uma relação.
+      </Text>
+      <View style={styles.associationList}>
+        {pains.map((pain) => (
+          <Pressable
+            key={pain.id}
+            onPress={() => onToggle(pain.id)}
+            style={[
+              styles.association,
+              selected.includes(pain.id) && styles.associationActive,
+            ]}
+          >
+            <Text style={styles.associationTitle}>
+              {bodySiteLabel(pain.primaryDetail ?? pain.primarySite)}
+            </Text>
+            <Text style={styles.associationDetail}>
+              Intensidade {pain.intensity}/10 ·{" "}
+              {formatDateTime(pain.occurredAt)}
+            </Text>
+            <Text style={styles.associationCheck}>
+              {selected.includes(pain.id) ? "✓" : "○"}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
 
-function FoodStep({ selected, period, customFoods, customName, onCustomName, onAddCustom, onPeriodChange, onToggle }: { selected: string[]; period: "today" | "last24h"; customFoods: FoodProfile[]; customName: string; onCustomName: (value: string) => void; onAddCustom: () => void; onPeriodChange: (period: "today" | "last24h") => void; onToggle: (id: string) => void }) { const items = [...FOOD_TRIGGERS, ...customFoods.map((food) => ({ id: food.id, label: food.label, icon: "✦" }))]; return <View><View style={styles.tabs}><Pressable onPress={() => onPeriodChange("today")} style={[styles.tab, period === "today" && styles.tabActive]}><Text style={[styles.tabText, period === "today" && styles.tabTextActive]}>Hoje</Text></Pressable><Pressable onPress={() => onPeriodChange("last24h")} style={[styles.tab, period === "last24h" && styles.tabActive]}><Text style={[styles.tabText, period === "last24h" && styles.tabTextActive]}>Últimas 24h</Text></Pressable></View><ChoiceGrid items={items} selected={selected} onToggle={onToggle} columns={2} /><View style={styles.customMedication}><Text style={styles.label}>Adicionar alimento customizado</Text><TextInput value={customName} onChangeText={onCustomName} placeholder="Ex.: alimento específico" placeholderTextColor="#8DA0A7" style={styles.input} /><PrimaryButton label="Adicionar alimento" variant="subtle" onPress={onAddCustom} style={styles.customAddButton} /></View></View>; }
+function FoodStep({
+  selected,
+  period,
+  customFoods,
+  customName,
+  onCustomName,
+  onAddCustom,
+  onPeriodChange,
+  onToggle,
+}: {
+  selected: string[];
+  period: "today" | "last24h";
+  customFoods: FoodProfile[];
+  customName: string;
+  onCustomName: (value: string) => void;
+  onAddCustom: () => void;
+  onPeriodChange: (period: "today" | "last24h") => void;
+  onToggle: (id: string) => void;
+}) {
+  const items = [
+    ...FOOD_TRIGGERS,
+    ...customFoods.map((food) => ({
+      id: food.id,
+      label: food.label,
+      icon: "✦",
+    })),
+  ];
+  return (
+    <View>
+      <View style={styles.tabs}>
+        <Pressable
+          onPress={() => onPeriodChange("today")}
+          style={[styles.tab, period === "today" && styles.tabActive]}
+        >
+          <Text
+            style={[styles.tabText, period === "today" && styles.tabTextActive]}
+          >
+            Hoje
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onPeriodChange("last24h")}
+          style={[styles.tab, period === "last24h" && styles.tabActive]}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              period === "last24h" && styles.tabTextActive,
+            ]}
+          >
+            Últimas 24h
+          </Text>
+        </Pressable>
+      </View>
+      <ChoiceGrid
+        items={items}
+        selected={selected}
+        onToggle={onToggle}
+        columns={2}
+      />
+      <View style={styles.customMedication}>
+        <Text style={styles.label}>Adicionar alimento customizado</Text>
+        <TextInput
+          value={customName}
+          onChangeText={onCustomName}
+          placeholder="Ex.: alimento específico"
+          placeholderTextColor="#8DA0A7"
+          style={styles.input}
+        />
+        <PrimaryButton
+          label="Adicionar alimento"
+          variant="subtle"
+          onPress={onAddCustom}
+          style={styles.customAddButton}
+        />
+      </View>
+    </View>
+  );
+}
 
-function MedicationStep({ history, selected, customName, customDose, customTime, onCustomName, onCustomDose, onCustomTime, onAdd, onAddCustom, onRemove }: { history: MedicationProfile[]; selected: MedicationUse[]; customName: string; customDose: string; customTime: string; onCustomName: (value: string) => void; onCustomDose: (value: string) => void; onCustomTime: (value: string) => void; onAdd: (profile: MedicationProfile, purpose: MedicationUse["purpose"]) => void; onAddCustom: (purpose: MedicationUse["purpose"]) => void; onRemove: (id: string, purpose: MedicationUse["purpose"]) => void }) { const preventive = selected.filter((item) => item.purpose === "preventive"); const control = selected.filter((item) => item.purpose === "pain-control"); return <View><Text style={styles.question}>Medicamentos preventivos</Text><Text style={styles.smallHelp}>Tomados hoje, antes da dor.</Text><MedicationOptions items={history} selected={preventive} purpose="preventive" onAdd={onAdd} onRemove={onRemove} /><Text style={[styles.question, styles.questionGap]}>Medicamentos para controle da dor</Text><Text style={styles.smallHelp}>Tomados para esta ocorrência.</Text><MedicationOptions items={history} selected={control} purpose="pain-control" onAdd={onAdd} onRemove={onRemove} /><View style={styles.customMedication}><Text style={styles.label}>Adicionar medicamento novo (opcional)</Text><TextInput value={customName} onChangeText={onCustomName} placeholder="Nome do medicamento" placeholderTextColor="#8DA0A7" style={styles.input} /><TextInput value={customDose} onChangeText={onCustomDose} placeholder="Dose (ex.: 500 mg)" placeholderTextColor="#8DA0A7" style={[styles.input, styles.inputGap]} /><TextInput value={customTime} onChangeText={onCustomTime} placeholder="Horário (ex.: 08:00)" placeholderTextColor="#8DA0A7" style={[styles.input, styles.inputGap]} /><View style={styles.customRow}><PrimaryButton label="Preventivo" variant="subtle" onPress={() => onAddCustom("preventive")} style={styles.customHalf} /><PrimaryButton label="Para dor" variant="subtle" onPress={() => onAddCustom("pain-control")} style={styles.customHalf} /></View></View></View>; }
-function MedicationOptions({ items, selected, purpose, onAdd, onRemove }: { items: MedicationProfile[]; selected: MedicationUse[]; purpose: MedicationUse["purpose"]; onAdd: (profile: MedicationProfile, purpose: MedicationUse["purpose"]) => void; onRemove: (id: string, purpose: MedicationUse["purpose"]) => void }) { return <View>{items.length ? items.map((item) => { const selectedEntry = selected.find((entry) => entry.id === item.id); const active = Boolean(selectedEntry); const meta = selectedEntry ? `${selectedEntry.dose ?? "Dose não informada"} · ${new Date(selectedEntry.takenAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : item.dose ?? "Toque para selecionar"; return <Pressable key={`${purpose}-${item.id}`} onPress={() => active ? onRemove(item.id, purpose) : onAdd(item, purpose)} style={[styles.medicationChoice, active && styles.medicationChoiceActive]}><Text style={styles.medicationIcon}>{active ? "✓" : "＋"}</Text><View style={styles.medicationTextWrap}><Text style={styles.medicationName}>{item.name}</Text><Text style={styles.medicationMeta}>{meta}</Text></View><Text style={styles.medicationAction}>{active ? "Remover" : "Adicionar"}</Text></Pressable>; }) : <Text style={styles.emptyInline}>Nenhum medicamento salvo ainda.</Text>}</View>; }
-function ReviewStep({ primaryDetail, primarySite, intensity, symptoms, painTypes, emotion, foodCount, medicationCount }: { primaryDetail?: BodySiteDetailId; primarySite?: BodySiteId; intensity?: number; symptoms: LocalSymptomId[]; painTypes: string[]; emotion?: string; foodCount: number; medicationCount: number }) { return <View style={styles.review}><Text style={styles.reviewTitle}>Confira antes de salvar</Text><ReviewRow label="Local" value={bodySiteLabel(primaryDetail ?? primarySite ?? "")} /><ReviewRow label="Intensidade" value={`${intensity ?? "—"}/10`} /><ReviewRow label="Sintomas locais" value={`${symptoms.length} selecionado${symptoms.length === 1 ? "" : "s"}`} /><ReviewRow label="Tipos de dor" value={`${painTypes.length} selecionado${painTypes.length === 1 ? "" : "s"}`} /><ReviewRow label="Emoção" value={emotion ? "Selecionada" : "Não informada"} /><ReviewRow label="Alimentos" value={`${foodCount} selecionado${foodCount === 1 ? "" : "s"}`} /><ReviewRow label="Medicamentos" value={`${medicationCount} selecionado${medicationCount === 1 ? "" : "s"}`} /><Text style={styles.reviewHelp}>O clima será associado automaticamente, se a localização e a conexão estiverem disponíveis.</Text></View>; }
-function ReviewRow({ label, value }: { label: string; value: string }) { return <View style={styles.reviewRow}><Text style={styles.reviewLabel}>{label}</Text><Text style={styles.reviewValue}>{value}</Text></View>; }
-function DetailGrid({ items, selected, onToggle }: { items: readonly { id: BodySiteDetailId; label: string }[]; selected: BodySiteDetailId[]; onToggle: (id: BodySiteDetailId) => void }) { return <View style={styles.detailGrid}>{items.map((item) => { const active = selected.includes(item.id); return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.label} accessibilityState={{ selected: active }} onPress={() => onToggle(item.id)} style={[styles.detailChoice, active && styles.detailChoiceActive]}><View style={[styles.detailDot, active && styles.detailDotActive]}><Text style={styles.detailDotText}>{active ? "✓" : "•"}</Text></View><Text style={[styles.detailLabel, active && styles.detailLabelActive]}>{item.label}</Text></Pressable>; })}</View>; }
-function IntensityStep({ value, onSelect }: { value?: number; onSelect: (value: number) => void }) { return <View style={styles.intensityWrap}><Text style={styles.intensityHint}>Toque em um número</Text><View style={styles.numberGrid}>{Array.from({ length: 10 }, (_, index) => index + 1).map((number) => <Pressable key={number} accessibilityRole="button" accessibilityLabel={`Intensidade ${number} de 10`} accessibilityState={{ selected: value === number }} onPress={() => onSelect(number)} style={[styles.number, value === number && styles.numberActive]}><Text style={[styles.numberText, value === number && styles.numberTextActive]}>{number}</Text></Pressable>)}</View><View style={styles.scaleLegend}><Text style={styles.legendLeft}>Leve</Text><Text style={styles.legendRight}>Muito forte</Text></View></View>; }
-function ChoiceGrid({ items, selected, onToggle, columns }: { items: readonly { id: string; label: string; icon: string }[]; selected: string[]; onToggle: (id: string) => void; columns: number }) { return <View style={styles.choiceGrid}>{items.map((item) => { const active = selected.includes(item.id); return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.label || "Espaço vazio"} accessibilityState={{ selected: active, disabled: !item.label }} disabled={!item.label} onPress={() => onToggle(item.id)} style={[styles.choice, columns === 3 && styles.choiceThree, columns === 2 && styles.choiceTwo, columns === 4 && styles.choiceFour, !item.label && styles.choicePlaceholder, active && styles.choiceActive]}><Text style={[styles.choiceIcon, active && styles.choiceIconActive]}>{item.icon}</Text><Text style={[styles.choiceLabel, active && styles.choiceLabelActive]}>{item.label}</Text></Pressable>; })}</View>; }
+function MedicationStep({
+  history,
+  selected,
+  customName,
+  customDose,
+  customTime,
+  onCustomName,
+  onCustomDose,
+  onCustomTime,
+  onAdd,
+  onAddCustom,
+  onRemove,
+}: {
+  history: MedicationProfile[];
+  selected: MedicationUse[];
+  customName: string;
+  customDose: string;
+  customTime: string;
+  onCustomName: (value: string) => void;
+  onCustomDose: (value: string) => void;
+  onCustomTime: (value: string) => void;
+  onAdd: (
+    profile: MedicationProfile,
+    purpose: MedicationUse["purpose"],
+  ) => void;
+  onAddCustom: (purpose: MedicationUse["purpose"]) => void;
+  onRemove: (id: string, purpose: MedicationUse["purpose"]) => void;
+}) {
+  const preventive = selected.filter((item) => item.purpose === "preventive");
+  const control = selected.filter((item) => item.purpose === "pain-control");
+  return (
+    <View>
+      <Text style={styles.question}>Medicamentos preventivos</Text>
+      <Text style={styles.smallHelp}>Tomados hoje, antes da dor.</Text>
+      <MedicationOptions
+        items={history}
+        selected={preventive}
+        purpose="preventive"
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
+      <Text style={[styles.question, styles.questionGap]}>
+        Medicamentos para controle da dor
+      </Text>
+      <Text style={styles.smallHelp}>Tomados para esta ocorrência.</Text>
+      <MedicationOptions
+        items={history}
+        selected={control}
+        purpose="pain-control"
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
+      <View style={styles.customMedication}>
+        <Text style={styles.label}>Adicionar medicamento novo (opcional)</Text>
+        <TextInput
+          value={customName}
+          onChangeText={onCustomName}
+          placeholder="Nome do medicamento"
+          placeholderTextColor="#8DA0A7"
+          style={styles.input}
+        />
+        <TextInput
+          value={customDose}
+          onChangeText={onCustomDose}
+          placeholder="Dose (ex.: 500 mg)"
+          placeholderTextColor="#8DA0A7"
+          style={[styles.input, styles.inputGap]}
+        />
+        <TextInput
+          value={customTime}
+          onChangeText={onCustomTime}
+          placeholder="Horário (ex.: 08:00)"
+          placeholderTextColor="#8DA0A7"
+          style={[styles.input, styles.inputGap]}
+        />
+        <View style={styles.customRow}>
+          <PrimaryButton
+            label="Preventivo"
+            variant="subtle"
+            onPress={() => onAddCustom("preventive")}
+            style={styles.customHalf}
+          />
+          <PrimaryButton
+            label="Para dor"
+            variant="subtle"
+            onPress={() => onAddCustom("pain-control")}
+            style={styles.customHalf}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+function MedicationOptions({
+  items,
+  selected,
+  purpose,
+  onAdd,
+  onRemove,
+}: {
+  items: MedicationProfile[];
+  selected: MedicationUse[];
+  purpose: MedicationUse["purpose"];
+  onAdd: (
+    profile: MedicationProfile,
+    purpose: MedicationUse["purpose"],
+  ) => void;
+  onRemove: (id: string, purpose: MedicationUse["purpose"]) => void;
+}) {
+  return (
+    <View>
+      {items.length ? (
+        items.map((item) => {
+          const selectedEntry = selected.find((entry) => entry.id === item.id);
+          const active = Boolean(selectedEntry);
+          const meta = selectedEntry
+            ? `${selectedEntry.dose ?? "Dose não informada"} · ${new Date(selectedEntry.takenAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+            : (item.dose ?? "Toque para selecionar");
+          return (
+            <Pressable
+              key={`${purpose}-${item.id}`}
+              onPress={() =>
+                active ? onRemove(item.id, purpose) : onAdd(item, purpose)
+              }
+              style={[
+                styles.medicationChoice,
+                active && styles.medicationChoiceActive,
+              ]}
+            >
+              <Text style={styles.medicationIcon}>{active ? "✓" : "＋"}</Text>
+              <View style={styles.medicationTextWrap}>
+                <Text style={styles.medicationName}>{item.name}</Text>
+                <Text style={styles.medicationMeta}>{meta}</Text>
+              </View>
+              <Text style={styles.medicationAction}>
+                {active ? "Remover" : "Adicionar"}
+              </Text>
+            </Pressable>
+          );
+        })
+      ) : (
+        <Text style={styles.emptyInline}>Nenhum medicamento salvo ainda.</Text>
+      )}
+    </View>
+  );
+}
+function ReviewStep({
+  primaryDetail,
+  primarySite,
+  intensity,
+  symptoms,
+  painTypes,
+  emotion,
+  foodCount,
+  medicationCount,
+}: {
+  primaryDetail?: BodySiteDetailId;
+  primarySite?: BodySiteId;
+  intensity?: number;
+  symptoms: LocalSymptomId[];
+  painTypes: string[];
+  emotion?: string;
+  foodCount: number;
+  medicationCount: number;
+}) {
+  return (
+    <View style={styles.review}>
+      <Text style={styles.reviewTitle}>Confira antes de salvar</Text>
+      <ReviewRow
+        label="Local"
+        value={bodySiteLabel(primaryDetail ?? primarySite ?? "")}
+      />
+      <ReviewRow label="Intensidade" value={`${intensity ?? "—"}/10`} />
+      <ReviewRow
+        label="Sintomas locais"
+        value={`${symptoms.length} selecionado${symptoms.length === 1 ? "" : "s"}`}
+      />
+      <ReviewRow
+        label="Tipos de dor"
+        value={`${painTypes.length} selecionado${painTypes.length === 1 ? "" : "s"}`}
+      />
+      <ReviewRow
+        label="Emoção"
+        value={emotion ? "Selecionada" : "Não informada"}
+      />
+      <ReviewRow
+        label="Alimentos"
+        value={`${foodCount} selecionado${foodCount === 1 ? "" : "s"}`}
+      />
+      <ReviewRow
+        label="Medicamentos"
+        value={`${medicationCount} selecionado${medicationCount === 1 ? "" : "s"}`}
+      />
+      <Text style={styles.reviewHelp}>
+        O clima será associado automaticamente, se a localização e a conexão
+        estiverem disponíveis.
+      </Text>
+    </View>
+  );
+}
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.reviewRow}>
+      <Text style={styles.reviewLabel}>{label}</Text>
+      <Text style={styles.reviewValue}>{value}</Text>
+    </View>
+  );
+}
+function DetailGrid({
+  items,
+  selected,
+  onToggle,
+}: {
+  items: readonly { id: BodySiteDetailId; label: string }[];
+  selected: BodySiteDetailId[];
+  onToggle: (id: BodySiteDetailId) => void;
+}) {
+  return (
+    <View style={styles.detailGrid}>
+      {items.map((item) => {
+        const active = selected.includes(item.id);
+        return (
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            accessibilityLabel={item.label}
+            accessibilityState={{ selected: active }}
+            onPress={() => onToggle(item.id)}
+            style={[styles.detailChoice, active && styles.detailChoiceActive]}
+          >
+            <View style={[styles.detailDot, active && styles.detailDotActive]}>
+              <Text style={styles.detailDotText}>{active ? "✓" : "•"}</Text>
+            </View>
+            <Text
+              style={[styles.detailLabel, active && styles.detailLabelActive]}
+            >
+              {item.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+function IntensityStep({
+  value,
+  onSelect,
+}: {
+  value?: number;
+  onSelect: (value: number) => void;
+}) {
+  return (
+    <View style={styles.intensityWrap}>
+      <Text style={styles.intensityHint}>Toque em um número</Text>
+      <View style={styles.numberGrid}>
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((number) => (
+          <Pressable
+            key={number}
+            accessibilityRole="button"
+            accessibilityLabel={`Intensidade ${number} de 10`}
+            accessibilityState={{ selected: value === number }}
+            onPress={() => onSelect(number)}
+            style={[styles.number, value === number && styles.numberActive]}
+          >
+            <Text
+              style={[
+                styles.numberText,
+                value === number && styles.numberTextActive,
+              ]}
+            >
+              {number}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.scaleLegend}>
+        <Text style={styles.legendLeft}>Leve</Text>
+        <Text style={styles.legendRight}>Muito forte</Text>
+      </View>
+    </View>
+  );
+}
+function ChoiceGrid({
+  items,
+  selected,
+  onToggle,
+  columns,
+}: {
+  items: readonly { id: string; label: string; icon: string }[];
+  selected: string[];
+  onToggle: (id: string) => void;
+  columns: number;
+}) {
+  return (
+    <View style={styles.choiceGrid}>
+      {items.map((item) => {
+        const active = selected.includes(item.id);
+        return (
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            accessibilityLabel={item.label || "Espaço vazio"}
+            accessibilityState={{ selected: active, disabled: !item.label }}
+            disabled={!item.label}
+            onPress={() => onToggle(item.id)}
+            style={[
+              styles.choice,
+              columns === 3 && styles.choiceThree,
+              columns === 2 && styles.choiceTwo,
+              columns === 4 && styles.choiceFour,
+              !item.label && styles.choicePlaceholder,
+              active && styles.choiceActive,
+            ]}
+          >
+            <Text
+              style={[styles.choiceIcon, active && styles.choiceIconActive]}
+            >
+              {item.icon}
+            </Text>
+            <Text
+              style={[styles.choiceLabel, active && styles.choiceLabelActive]}
+            >
+              {item.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
-const styles = StyleSheet.create({ root: { flex: 1 }, content: { paddingBottom: 30, paddingTop: 8 }, topline: { alignItems: "center", flexDirection: "row", marginBottom: 8 }, back: { alignItems: "center", height: 44, justifyContent: "center", width: 44 }, backText: { color: "#176B87", fontSize: 34, lineHeight: 38 }, progress: { color: "#789098", flex: 1, fontSize: 13, fontWeight: "800", textAlign: "right" }, detailPanel: { backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 18, borderWidth: 1, marginTop: 16, padding: 14 }, mapConfirmation: { color: "#176B87", fontSize: 13, fontWeight: "800", marginBottom: 10, textAlign: "center" }, optionalHint: { color: "#60747C", fontSize: 13, lineHeight: 18, marginBottom: 8, textAlign: "center" }, selectionCount: { color: "#176B87", fontSize: 13, fontWeight: "800", marginTop: 10, textAlign: "center" }, detailTitle: { color: "#152A33", fontSize: 15, fontWeight: "800", marginBottom: 12 }, detailGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 }, detailChoice: { alignItems: "center", backgroundColor: "#F4F7F8", borderColor: "#D9E3E7", borderRadius: 14, borderWidth: 1, flexDirection: "row", minHeight: 50, paddingHorizontal: 9, width: "48%" }, detailChoiceActive: { backgroundColor: "#EAF4F7", borderColor: "#176B87", borderWidth: 2 }, detailDot: { alignItems: "center", backgroundColor: "#DCE9ED", borderRadius: 14, height: 28, justifyContent: "center", marginRight: 7, width: 28 }, detailDotActive: { backgroundColor: "#176B87" }, detailDotText: { color: "#176B87", fontSize: 13, fontWeight: "800" }, detailLabel: { color: "#526873", flex: 1, fontSize: 12, fontWeight: "700", lineHeight: 15 }, detailLabelActive: { color: "#152A33" }, emptyEmoji: { color: "#176B87", fontSize: 24 }, intensityWrap: { paddingTop: 10 }, intensityHint: { color: "#60747C", fontSize: 14, fontWeight: "600", marginBottom: 16, textAlign: "center" }, numberGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center" }, number: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#BCD0D6", borderRadius: 18, borderWidth: 2, height: 58, justifyContent: "center", width: 58 }, numberActive: { backgroundColor: "#E98B5A", borderColor: "#B55735", transform: [{ scale: 1.06 }] }, numberText: { color: "#176B87", fontSize: 22, fontWeight: "800" }, numberTextActive: { color: "#FFFFFF" }, scaleLegend: { flexDirection: "row", justifyContent: "space-between", marginTop: 14 }, legendLeft: { color: "#3F8D72", fontSize: 12, fontWeight: "700" }, legendRight: { color: "#B55735", fontSize: 12, fontWeight: "700" }, choiceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingTop: 8 }, choice: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 16, borderWidth: 1, minHeight: 94, padding: 10, width: "31%" }, choicePlaceholder: { backgroundColor: "#F7FAFC", borderStyle: "dashed", opacity: 0.55 }, choiceThree: { width: "31%" }, choiceTwo: { width: "48%" }, choiceFour: { width: "22%" }, choiceActive: { backgroundColor: "#EAF4F7", borderColor: "#176B87", borderWidth: 2 }, choiceIcon: { color: "#176B87", fontSize: 28, height: 36, lineHeight: 34, textAlign: "center" }, choiceIconActive: { color: "#E98B5A" }, choiceLabel: { color: "#526873", fontSize: 12, fontWeight: "700", lineHeight: 15, marginTop: 7, textAlign: "center" }, choiceLabelActive: { color: "#152A33" }, noneButton: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 15, borderWidth: 1, marginBottom: 13, minHeight: 50, justifyContent: "center" }, noneButtonActive: { backgroundColor: "#EAF4F7", borderColor: "#176B87", borderWidth: 2 }, noneText: { color: "#526873", fontSize: 15, fontWeight: "700" }, noneTextActive: { color: "#176B87" }, actions: { marginTop: 22 }, privacy: { color: "#789098", fontSize: 12, lineHeight: 17, marginTop: 12, textAlign: "center" }, question: { color: "#152A33", fontSize: 18, fontWeight: "800", marginBottom: 5 }, questionGap: { marginTop: 22 }, smallHelp: { color: "#60747C", fontSize: 13, lineHeight: 19, marginBottom: 12 }, associationList: { gap: 10 }, association: { backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 16, borderWidth: 1, minHeight: 72, padding: 13, position: "relative" }, associationActive: { backgroundColor: "#EAF4F7", borderColor: "#176B87", borderWidth: 2 }, associationTitle: { color: "#152A33", fontSize: 14, fontWeight: "800", paddingRight: 30 }, associationDetail: { color: "#60747C", fontSize: 12, marginTop: 4 }, associationCheck: { color: "#176B87", fontSize: 24, position: "absolute", right: 14, top: 20 }, tabs: { backgroundColor: "#EAF0F2", borderRadius: 14, flexDirection: "row", marginBottom: 12, padding: 4 }, tab: { alignItems: "center", borderRadius: 10, flex: 1, minHeight: 40, justifyContent: "center" }, tabActive: { backgroundColor: "#176B87" }, tabText: { color: "#60747C", fontSize: 14, fontWeight: "700" }, tabTextActive: { color: "#FFFFFF" }, customButton: { alignItems: "center", backgroundColor: "#EAF4F7", borderRadius: 15, marginTop: 14, minHeight: 50, justifyContent: "center" }, customButtonText: { color: "#176B87", fontSize: 14, fontWeight: "800" }, medicationChoice: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 15, borderWidth: 1, flexDirection: "row", marginBottom: 8, minHeight: 52, paddingHorizontal: 13 }, medicationChoiceActive: { backgroundColor: "#EAF4F7", borderColor: "#176B87", borderWidth: 2 }, medicationIcon: { color: "#176B87", fontSize: 22, marginRight: 10 }, medicationTextWrap: { flex: 1 }, medicationName: { color: "#152A33", fontSize: 14, fontWeight: "700" }, medicationMeta: { color: "#60747C", fontSize: 11, marginTop: 3 }, medicationAction: { color: "#176B87", fontSize: 11, fontWeight: "800", marginLeft: 6 }, emptyInline: { color: "#789098", fontSize: 13, fontStyle: "italic", marginBottom: 8 }, customMedication: { backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 16, borderWidth: 1, marginTop: 14, padding: 14 }, label: { color: "#344C56", fontSize: 13, fontWeight: "800", marginBottom: 7 }, input: { backgroundColor: "#F7FAFC", borderColor: "#D9E3E7", borderRadius: 12, borderWidth: 1, color: "#152A33", minHeight: 48, paddingHorizontal: 12 }, customRow: { flexDirection: "row", gap: 8, marginTop: 10 }, customHalf: { flex: 1 }, customAddButton: { marginTop: 10 }, inputGap: { marginTop: 8 }, review: { backgroundColor: "#FFFFFF", borderColor: "#D9E3E7", borderRadius: 20, borderWidth: 1, padding: 16 }, reviewTitle: { color: "#152A33", fontSize: 18, fontWeight: "800", marginBottom: 8 }, reviewRow: { borderTopColor: "#ECF0F2", borderTopWidth: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: 11 }, reviewLabel: { color: "#60747C", fontSize: 13 }, reviewValue: { color: "#152A33", fontSize: 13, fontWeight: "800" }, reviewHelp: { color: "#789098", fontSize: 12, lineHeight: 17, marginTop: 12 } });
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  content: { paddingBottom: 30, paddingTop: 8 },
+  topline: { alignItems: "center", flexDirection: "row", marginBottom: 8 },
+  back: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  backText: { color: "#176B87", fontSize: 34, lineHeight: 38 },
+  progress: {
+    color: "#789098",
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "800",
+    textAlign: "right",
+  },
+  detailPanel: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 18,
+    borderWidth: 1,
+    marginTop: 16,
+    padding: 14,
+  },
+  mapConfirmation: {
+    color: "#176B87",
+    fontSize: 13,
+    fontWeight: "800",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  optionalHint: {
+    color: "#60747C",
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  selectionCount: {
+    color: "#176B87",
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  detailTitle: {
+    color: "#152A33",
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 12,
+  },
+  detailGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  detailChoice: {
+    alignItems: "center",
+    backgroundColor: "#F4F7F8",
+    borderColor: "#D9E3E7",
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 50,
+    paddingHorizontal: 9,
+    width: "48%",
+  },
+  detailChoiceActive: {
+    backgroundColor: "#EAF4F7",
+    borderColor: "#176B87",
+    borderWidth: 2,
+  },
+  detailDot: {
+    alignItems: "center",
+    backgroundColor: "#DCE9ED",
+    borderRadius: 14,
+    height: 28,
+    justifyContent: "center",
+    marginRight: 7,
+    width: 28,
+  },
+  detailDotActive: { backgroundColor: "#176B87" },
+  detailDotText: { color: "#176B87", fontSize: 13, fontWeight: "800" },
+  detailLabel: {
+    color: "#526873",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 15,
+  },
+  detailLabelActive: { color: "#152A33" },
+  emptyEmoji: { color: "#176B87", fontSize: 24 },
+  intensityWrap: { paddingTop: 10 },
+  intensityHint: {
+    color: "#60747C",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  numberGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    justifyContent: "center",
+  },
+  number: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#BCD0D6",
+    borderRadius: 18,
+    borderWidth: 2,
+    height: 58,
+    justifyContent: "center",
+    width: 58,
+  },
+  numberActive: {
+    backgroundColor: "#E98B5A",
+    borderColor: "#B55735",
+    transform: [{ scale: 1.06 }],
+  },
+  numberText: { color: "#176B87", fontSize: 22, fontWeight: "800" },
+  numberTextActive: { color: "#FFFFFF" },
+  scaleLegend: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 14,
+  },
+  legendLeft: { color: "#3F8D72", fontSize: 12, fontWeight: "700" },
+  legendRight: { color: "#B55735", fontSize: 12, fontWeight: "700" },
+  choiceGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    paddingTop: 8,
+  },
+  choice: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 94,
+    padding: 10,
+    width: "31%",
+  },
+  choicePlaceholder: {
+    backgroundColor: "#F7FAFC",
+    borderStyle: "dashed",
+    opacity: 0.55,
+  },
+  choiceThree: { width: "31%" },
+  choiceTwo: { width: "48%" },
+  choiceFour: { width: "22%" },
+  choiceActive: {
+    backgroundColor: "#EAF4F7",
+    borderColor: "#176B87",
+    borderWidth: 2,
+  },
+  choiceIcon: {
+    color: "#176B87",
+    fontSize: 28,
+    height: 36,
+    lineHeight: 34,
+    textAlign: "center",
+  },
+  choiceIconActive: { color: "#E98B5A" },
+  choiceLabel: {
+    color: "#526873",
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 15,
+    marginTop: 7,
+    textAlign: "center",
+  },
+  choiceLabelActive: { color: "#152A33" },
+  noneButton: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 15,
+    borderWidth: 1,
+    marginBottom: 13,
+    minHeight: 50,
+    justifyContent: "center",
+  },
+  noneButtonActive: {
+    backgroundColor: "#EAF4F7",
+    borderColor: "#176B87",
+    borderWidth: 2,
+  },
+  noneText: { color: "#526873", fontSize: 15, fontWeight: "700" },
+  noneTextActive: { color: "#176B87" },
+  actions: { marginTop: 22 },
+  privacy: {
+    color: "#789098",
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 12,
+    textAlign: "center",
+  },
+  question: {
+    color: "#152A33",
+    fontSize: 18,
+    fontWeight: "800",
+    marginBottom: 5,
+  },
+  questionGap: { marginTop: 22 },
+  smallHelp: {
+    color: "#60747C",
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 12,
+  },
+  associationList: { gap: 10 },
+  association: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 72,
+    padding: 13,
+    position: "relative",
+  },
+  associationActive: {
+    backgroundColor: "#EAF4F7",
+    borderColor: "#176B87",
+    borderWidth: 2,
+  },
+  associationTitle: {
+    color: "#152A33",
+    fontSize: 14,
+    fontWeight: "800",
+    paddingRight: 30,
+  },
+  associationDetail: { color: "#60747C", fontSize: 12, marginTop: 4 },
+  associationCheck: {
+    color: "#176B87",
+    fontSize: 24,
+    position: "absolute",
+    right: 14,
+    top: 20,
+  },
+  tabs: {
+    backgroundColor: "#EAF0F2",
+    borderRadius: 14,
+    flexDirection: "row",
+    marginBottom: 12,
+    padding: 4,
+  },
+  tab: {
+    alignItems: "center",
+    borderRadius: 10,
+    flex: 1,
+    minHeight: 40,
+    justifyContent: "center",
+  },
+  tabActive: { backgroundColor: "#176B87" },
+  tabText: { color: "#60747C", fontSize: 14, fontWeight: "700" },
+  tabTextActive: { color: "#FFFFFF" },
+  customButton: {
+    alignItems: "center",
+    backgroundColor: "#EAF4F7",
+    borderRadius: 15,
+    marginTop: 14,
+    minHeight: 50,
+    justifyContent: "center",
+  },
+  customButtonText: { color: "#176B87", fontSize: 14, fontWeight: "800" },
+  medicationChoice: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 15,
+    borderWidth: 1,
+    flexDirection: "row",
+    marginBottom: 8,
+    minHeight: 52,
+    paddingHorizontal: 13,
+  },
+  medicationChoiceActive: {
+    backgroundColor: "#EAF4F7",
+    borderColor: "#176B87",
+    borderWidth: 2,
+  },
+  medicationIcon: { color: "#176B87", fontSize: 22, marginRight: 10 },
+  medicationTextWrap: { flex: 1 },
+  medicationName: { color: "#152A33", fontSize: 14, fontWeight: "700" },
+  medicationMeta: { color: "#60747C", fontSize: 11, marginTop: 3 },
+  medicationAction: {
+    color: "#176B87",
+    fontSize: 11,
+    fontWeight: "800",
+    marginLeft: 6,
+  },
+  emptyInline: {
+    color: "#789098",
+    fontSize: 13,
+    fontStyle: "italic",
+    marginBottom: 8,
+  },
+  customMedication: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 16,
+    borderWidth: 1,
+    marginTop: 14,
+    padding: 14,
+  },
+  label: { color: "#344C56", fontSize: 13, fontWeight: "800", marginBottom: 7 },
+  input: {
+    backgroundColor: "#F7FAFC",
+    borderColor: "#D9E3E7",
+    borderRadius: 12,
+    borderWidth: 1,
+    color: "#152A33",
+    minHeight: 48,
+    paddingHorizontal: 12,
+  },
+  customRow: { flexDirection: "row", gap: 8, marginTop: 10 },
+  customHalf: { flex: 1 },
+  customAddButton: { marginTop: 10 },
+  inputGap: { marginTop: 8 },
+  review: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E3E7",
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+  },
+  reviewTitle: {
+    color: "#152A33",
+    fontSize: 18,
+    fontWeight: "800",
+    marginBottom: 8,
+  },
+  reviewRow: {
+    borderTopColor: "#ECF0F2",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 11,
+  },
+  reviewLabel: { color: "#60747C", fontSize: 13 },
+  reviewValue: { color: "#152A33", fontSize: 13, fontWeight: "800" },
+  reviewHelp: { color: "#789098", fontSize: 12, lineHeight: 17, marginTop: 12 },
+});
