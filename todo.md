@@ -234,3 +234,13 @@
 - [x] Exibir hotspots anatômicos sobre o corpo já em 1×, sem depender do zoom para revelar interação.
 - [x] Mostrar nomes curtos e legíveis dos pontos em 1×, ampliando a informação durante o zoom.
 - [x] Manter o toque direto, o zoom por pinça e a gravação do ponto selecionado na ocorrência.
+
+- [ ] Remover a malha aproximada de círculos que não corresponde às estruturas anatômicas.
+- [ ] Criar zonas de toque nomeadas e alinhadas ao desenho para olho, orelha, queixo, costela, órgãos, músculos, articulações, mãos e pés.
+- [ ] Validar exemplos concretos com nome e lateralidade antes de considerar o mapa pronto.
+
+- [ ] Substituir seleção por pontos discretos por mapeamento contínuo de qualquer coordenada X/Y tocada.
+- [ ] Criar camadas anatômicas de resolução progressiva: superfície, músculo, articulação, osso, nervo e órgão projetado.
+- [ ] Garantir que cada coordenada produza uma nomenclatura detalhada, com vista e lateralidade, sem retornar uma região genérica por proximidade ampla.
+
+- [x] Implementar a base do atlas contínuo com precedência hierárquica em quatro vistas e validar pontos-exemplo de superfície, estruturas musculoesqueléticas e projeções internas.
