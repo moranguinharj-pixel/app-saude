@@ -247,4 +247,4 @@
 
 - [ ] Inspecionar o ZIP Registro-Pessoal-1.0.17-arquivos.zip e preparar o projeto para gerar o APK pelo fluxo suportado.
 
-- [ ] Enviar os arquivos do ZIP Registro-Pessoal-1.0.17 para o repositório GitHub em uma pasta separada, preservando o projeto ativo.
+- [x] Enviar os arquivos do ZIP Registro-Pessoal-1.0.17 para o repositório GitHub em uma pasta separada, preservando o projeto ativo.
